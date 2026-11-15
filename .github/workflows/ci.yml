@@ -10,6 +10,7 @@ on:
         options:
           - source
           - packaging-recovery
+          - artifact-recovery
 
 permissions:
   contents: read
@@ -69,6 +70,7 @@ jobs:
         with:
           name: meta-ads-packages-${{ github.sha }}
           path: candidate/.ci-artifacts/*
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
       - name: Save bounded diagnostics
@@ -138,6 +140,7 @@ jobs:
         with:
           name: meta-ads-arm64-evidence-${{ github.sha }}
           path: candidate/.ci-artifacts/verify-arm64-evidence.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
       - name: Save bounded diagnostics

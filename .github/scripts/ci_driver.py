@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -36,7 +37,7 @@ def main() -> None:
         raise SystemExit("This driver requires the managed, identified GitHub job")
     mode = sys.argv[1]
     scope = os.environ.get("META_ADS_CHECK_SCOPE", "source")
-    if scope not in {"source", "packaging-recovery"}:
+    if scope not in {"source", "packaging-recovery", "artifact-recovery"}:
         raise SystemExit("Unknown check scope")
     core = Path.cwd()
     source = core / "candidate"
@@ -142,11 +143,16 @@ def main() -> None:
                     "bash",
                     "core/entrypoints/cli/scripts/lint.sh",
                     "--checks",
-                    "extension-static,extension-tests" if static else "extension-tests",
+                    (
+                        "extension-static"
+                        if static and not targets
+                        else "extension-static,extension-tests"
+                        if static
+                        else "extension-tests"
+                    ),
                     "--extension-root",
                     str(source),
-                    "--test-paths",
-                    targets,
+                    *(["--test-paths", targets] if targets else []),
                 ],
                 env=env,
             )
@@ -154,25 +160,28 @@ def main() -> None:
             run([*base, "cleanup", "--apply"], env=env)
 
     if mode == "quality-package":
-        checks(
-            "source",
-            (
-                "tests/test_packaging.py::"
-                "test_explicit_target_and_output_produce_only_one_compatible_archive"
-                if scope == "packaging-recovery"
-                else " ".join(
-                    [
-                        "tests/test_validation.py",
-                        "tests/test_operations.py",
-                        "tests/test_transport.py",
-                        "tests/test_setup_and_boundaries.py",
-                        "tests/test_review_regressions.py",
-                        "tests/test_packaging.py",
-                    ]
-                )
-            ),
-            static=True,
-        )
+        if scope == "artifact-recovery":
+            checks("ci-static", "", static=True)
+        else:
+            checks(
+                "source",
+                (
+                    "tests/test_packaging.py::"
+                    "test_explicit_target_and_output_produce_only_one_compatible_archive"
+                    if scope == "packaging-recovery"
+                    else " ".join(
+                        [
+                            "tests/test_validation.py",
+                            "tests/test_operations.py",
+                            "tests/test_transport.py",
+                            "tests/test_setup_and_boundaries.py",
+                            "tests/test_review_regressions.py",
+                            "tests/test_packaging.py",
+                        ]
+                    )
+                ),
+                static=True,
+            )
         command = [
             "docker",
             "run",
@@ -244,7 +253,17 @@ def main() -> None:
                 "/tooling",
             ]
         )
-    checks("archive", "tests/test_package_install.py")
+    if mode == "quality-package" and scope == "artifact-recovery":
+        # Reuse only the exact native AMD64 bytes accepted by run43762111336.
+        expected = {
+            "flowsteward.meta-ads-1.0.0-linux-amd64.zip": "608281c1f9f891b436deb67412b0430fa481ba69219edff24aa98374f9360d90",
+            "flowsteward.meta-ads-1.0.0-linux-arm64.zip": "0c192405fa661355786cf59fd274e1f3682dec654f2ae5565a21659ec5c90788",
+        }
+        for name, archive_digest in expected.items():
+            if hashlib.sha256((artifact / name).read_bytes()).hexdigest() != archive_digest:
+                raise SystemExit("Archive differs from the previously accepted recovery bytes")
+    else:
+        checks("archive", "tests/test_package_install.py")
     result = {
         "source_sha": sha,
         "core_sha": CORE,
@@ -252,7 +271,12 @@ def main() -> None:
         "mode": mode,
         "check_scope": scope,
         "prior_source_pass_sha": (
-            "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope == "packaging-recovery" else None
+            "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope != "source" else None
+        ),
+        "prior_amd64_archive_pass": (
+            {"source_sha": "76130f1cb4b64a21cdd23492f43510baf60aaff7", "run_id": 43762111336}
+            if mode == "quality-package" and scope == "artifact-recovery"
+            else None
         ),
         "audit_toolchain": digest,
         "audit_image": image,
