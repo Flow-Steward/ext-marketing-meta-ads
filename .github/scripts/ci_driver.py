@@ -101,6 +101,13 @@ def main() -> None:
     if actual_digest != digest:
         raise SystemExit("Built audit image has the wrong toolchain identity")
 
+    # Align hosted writer IDs: nested caches must remain removable by the runner.
+    uid_override = scratch / "audit-uid.yaml"
+    uid_override.write_text(
+        f'services:\n  fs-audit:\n    user: "{os.getuid()}:{os.getgid()}"\n'
+        "    environment:\n      HOME: /tmp\n"
+    )
+
     def checks(suffix: str, targets: str, static: bool = False) -> None:
         identity = owner + "-" + suffix
         base = [
@@ -112,7 +119,12 @@ def main() -> None:
             "--owner",
             identity,
         ]
-        env = dict(os.environ, FS_BORROWED_AUDIT_IMAGE=image, FS_STACK_ENV_FILE="/dev/null")
+        env = dict(
+            os.environ,
+            FS_BORROWED_AUDIT_IMAGE=image,
+            FS_STACK_ENV_FILE="/dev/null",
+            FS_COMPOSE_FILES=f"infra/docker/docker-compose.yaml {uid_override}",
+        )
         try:
             run(
                 [

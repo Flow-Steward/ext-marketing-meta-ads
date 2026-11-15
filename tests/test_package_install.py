@@ -87,6 +87,24 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
         ],
         check=True,
     )
+    runtime_env = {
+        key: value for key, value in os.environ.items() if key not in {"PYTHONPATH", "PYTHONHOME"}
+    }
+    runtime_env["PYTHONNOUSERSITE"] = "1"
+    imported = subprocess.run(
+        [
+            str(python),
+            "-c",
+            "from pathlib import Path; import meta_ads.runtime; "
+            "assert Path(meta_ads.runtime.__file__).resolve().is_relative_to(Path.cwd().resolve())",
+        ],
+        cwd=extension,
+        env=runtime_env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert imported.returncode == 0, imported.stderr
     request = {
         "contract_version": "extension_host_v2",
         "mode": "handshake",
@@ -101,6 +119,7 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
         [str(python), "main.py"],
         input=json.dumps(request),
         cwd=extension,
+        env=runtime_env,
         text=True,
         capture_output=True,
         check=False,
@@ -108,7 +127,12 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
     assert handshake.returncode == 0 and not handshake.stderr, handshake.stderr
     assert json.loads(handshake.stdout)["result"]["contract_version"] == "extension_host_v2"
     health = subprocess.run(
-        [str(python), "health.py"], cwd=extension, text=True, capture_output=True, check=False
+        [str(python), "health.py"],
+        cwd=extension,
+        env=runtime_env,
+        text=True,
+        capture_output=True,
+        check=False,
     )
     assert health.returncode == 0 and not health.stderr, health.stderr
     assert json.loads(health.stdout)["status"] == "healthy"
