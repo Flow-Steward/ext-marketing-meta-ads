@@ -177,3 +177,13 @@ ZIP. Short/detailed/setup descriptions, examples, icon and branding provenance r
 The validated ZIPs and source-bound `release-plan.json` are retained as GitHub Actions
 artifacts for seven days. Download them before expiration. Publication is an explicit
 later operation; passing this CI does not certify live OAuth or Meta ad delivery.
+
+Private release publication uses the separate manual `publish-private.yml` workflow.
+It consumes only a successful source-bound run of the native CI above. The release
+owner must accept the exact extension/Core identities and record ROOT GO after
+Core v0.9.18 is actually published. Preparation leaves those approvals unset.
+Both tag creation and release asset upload occur inside CI; the shared publisher
+requires the repository to remain private and verifies downloaded asset bytes.
+Public availability and catalog registration are later owner-controlled steps.
+The active icon is the Flow Steward publisher mark, not Meta artwork; provenance
+and the provider-logo usage restriction are recorded in `BRANDING.md`.

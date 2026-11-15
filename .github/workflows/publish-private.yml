@@ -1,0 +1,174 @@
+name: Publish private Meta Ads release
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_run_id:
+        description: Successful source-bound Meta Ads CI run ID
+        required: true
+        type: string
+      core_sha:
+        description: Published Core v0.9.18 commit accepted by ROOT
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: meta-ads-private-release
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Require exact ROOT GO and a published Core
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_RUN_ID: ${{ inputs.package_run_id }}
+          CORE_SHA: ${{ inputs.core_sha }}
+          APPROVED_SHA: ${{ vars.META_ADS_RELEASE_APPROVED_SHA }}
+          APPROVED_CORE_SHA: ${{ vars.META_ADS_RELEASE_APPROVED_CORE_SHA }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = Flow-Steward/ext-marketing-meta-ads
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$CORE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$PACKAGE_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$APPROVED_SHA" = "$GITHUB_SHA"
+          test "$APPROVED_CORE_SHA" = "$CORE_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+          gh api repos/Flow-Steward/flow-steward-app/releases/tags/v0.9.18 |
+            jq -e '.tag_name == "v0.9.18" and .draft == false and .prerelease == false and (.published_at | type == "string")'
+          test "$(gh api repos/Flow-Steward/flow-steward-app/commits/v0.9.18 --jq .sha)" = "$CORE_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PACKAGE_RUN_ID" |
+            jq -e --arg sha "$GITHUB_SHA" --arg repo "$GITHUB_REPOSITORY" '.head_sha == $sha and .head_repository.full_name == $repo and .head_branch == "main" and .path == ".github/workflows/ci.yml" and .event == "workflow_dispatch" and .status == "completed" and .conclusion == "success"'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PACKAGE_RUN_ID/jobs?per_page=100" |
+            jq -e '[.jobs[] | select(.name == "quality-package" or .name == "verify-arm64") | .conclusion] | length == 2 and all(. == "success")'
+      - name: Check out reviewed shared publication tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/extensions
+          ref: 02c0f6f19b665c46300d42e790ef74375f3d0e67
+          path: tooling
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install trusted inspector dependency
+        run: python -m pip install PyYAML==6.0.3
+      - name: Assert private identity with the shared guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PYTHON'
+          import os, sys, tempfile
+          sys.path.insert(0, 'tooling/scripts')
+          import publish_extension_release as shared
+          with tempfile.TemporaryDirectory(prefix='meta-ads-private-check-') as isolated:
+              shared._verify_repository(shared.GitHub(isolated), os.environ['GITHUB_REPOSITORY'], 'private')
+          PYTHON
+      - name: Download selected CI packages
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: meta-ads-packages-${{ github.sha }}
+          path: downloaded/packages
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.package_run_id }}
+      - name: Download selected native ARM64 evidence
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: meta-ads-arm64-evidence-${{ github.sha }}
+          path: downloaded/arm64
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.package_run_id }}
+      - name: Stage exact plan payload and preserve source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "quality-package" and .architecture == "x86_64" and .check_scope == "release-prep" and .runtime_source_inputs_equal == "b5edea676a18bc208ca6a530e63e5261d6775ee9"' downloaded/packages/quality-package-evidence.json
+          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "verify-arm64" and .architecture == "aarch64" and .check_scope == "release-prep"' downloaded/arm64/verify-arm64-evidence.json
+          mkdir payload
+          cp downloaded/packages/flowsteward.meta-ads-1.0.0-linux-amd64.zip payload/
+          cp downloaded/packages/flowsteward.meta-ads-1.0.0-linux-arm64.zip payload/
+          cp downloaded/packages/1.0.0.md payload/
+          cp downloaded/packages/release-plan.json payload/
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --catalog-root tooling
+      - name: Retain this run's verified private publication payload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: private-release-payload-${{ github.sha }}
+          path: payload/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out only reviewed shared publication tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/extensions
+          ref: 02c0f6f19b665c46300d42e790ef74375f3d0e67
+          path: tooling
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML==6.0.3
+      - name: Download only this run's validated payload
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: private-release-payload-${{ github.sha }}
+          path: payload
+      - name: Recheck exact approval, Core publication and source-bound artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CORE_SHA: ${{ inputs.core_sha }}
+          APPROVED_SHA: ${{ vars.META_ADS_RELEASE_APPROVED_SHA }}
+          APPROVED_CORE_SHA: ${{ vars.META_ADS_RELEASE_APPROVED_CORE_SHA }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$APPROVED_SHA" = "$GITHUB_SHA"
+          test "$APPROVED_CORE_SHA" = "$CORE_SHA"
+          gh api repos/Flow-Steward/flow-steward-app/releases/tags/v0.9.18 |
+            jq -e '.draft == false and .prerelease == false and (.published_at | type == "string")'
+          test "$(gh api repos/Flow-Steward/flow-steward-app/commits/v0.9.18 --jq .sha)" = "$CORE_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --catalog-root tooling
+      - name: Create immutable release tag only after verified prerequisites
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, tempfile, sys
+          sys.path.insert(0, 'tooling/scripts')
+          import publish_extension_release as shared
+          repository, sha = os.environ['GITHUB_REPOSITORY'], os.environ['GITHUB_SHA']
+          with tempfile.TemporaryDirectory(prefix='meta-ads-tag-') as isolated:
+              github = shared.GitHub(isolated)
+              shared._verify_repository(github, repository, 'private')
+              reference = github.api(f'repos/{repository}/git/ref/tags/v1.0.0', allow_missing=True)
+              if reference is None:
+                  result = github.run(['api', '--method', 'POST', f'repos/{repository}/git/refs', '-f', 'ref=refs/tags/v1.0.0', '-f', 'sha=' + sha])
+                  shared._require(result.returncode == 0, 'Tag creation failed or outcome unknown; no retry attempted')
+              shared._require(shared._tag_commit(github, repository, 'v1.0.0') == sha, 'Existing tag differs; refusing mutation')
+          PY
+      - name: Publish and authenticate asset readback through the shared private guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python tooling/scripts/publish_extension_release.py --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --expected-visibility private

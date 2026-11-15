@@ -12,7 +12,7 @@ import tarfile
 from typing import Any
 
 CORE = "2260894d4e13ada0452a681e0be616eb4463e7ab"
-CATALOG = "4ad7b1131c72c381d6bcbb5613f209b077a01ce0"
+CATALOG = "02c0f6f19b665c46300d42e790ef74375f3d0e67"
 REPOSITORY = "Flow-Steward/ext-marketing-meta-ads"
 
 
@@ -37,7 +37,7 @@ def main() -> None:
         raise SystemExit("This driver requires the managed, identified GitHub job")
     mode = sys.argv[1]
     scope = os.environ.get("META_ADS_CHECK_SCOPE", "source")
-    if scope not in {"source", "packaging-recovery", "artifact-recovery"}:
+    if scope not in {"source", "packaging-recovery", "artifact-recovery", "release-prep"}:
         raise SystemExit("Unknown check scope")
     core = Path.cwd()
     source = core / "candidate"
@@ -50,6 +50,27 @@ def main() -> None:
     if sha != os.environ["GITHUB_SHA"]:
         raise SystemExit("Extension checkout differs from the dispatched SHA")
     run(["git", "-C", str(source), "diff", "--quiet", "HEAD", "--"])
+    if scope == "release-prep":
+        # Reuse runtime evidence only when its complete source inputs are unchanged.
+        run(
+            [
+                "git",
+                "-C",
+                str(source),
+                "diff",
+                "--quiet",
+                "b5edea676a18bc208ca6a530e63e5261d6775ee9",
+                sha,
+                "--",
+                ".",
+                ":(exclude).github/**",
+                ":(exclude)docs/**",
+                ":(exclude)README.md",
+                ":(exclude)BRANDING.md",
+                ":(exclude)icon.png",
+                ":(exclude)branding/meta-logo-source.png",
+            ]
+        )
     registry = Path(os.environ["RUNNER_TEMP"]) / "meta-ads-ownership"
     owner = os.environ["FS_TASK_RESOURCE_OWNER"]
     scratch = Path(os.environ["FS_TASK_SCRATCH"])
@@ -169,6 +190,8 @@ def main() -> None:
                     "tests/test_packaging.py::"
                     "test_explicit_target_and_output_produce_only_one_compatible_archive"
                     if scope == "packaging-recovery"
+                    else "tests/test_packaging.py"
+                    if scope == "release-prep"
                     else " ".join(
                         [
                             "tests/test_validation.py",
@@ -272,6 +295,9 @@ def main() -> None:
         "check_scope": scope,
         "prior_source_pass_sha": (
             "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope != "source" else None
+        ),
+        "runtime_source_inputs_equal": (
+            "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope == "release-prep" else None
         ),
         "prior_amd64_archive_pass": (
             {"source_sha": "76130f1cb4b64a21cdd23492f43510baf60aaff7", "run_id": 43762111336}

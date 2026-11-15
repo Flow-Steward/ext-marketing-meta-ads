@@ -21,10 +21,11 @@
   "icon": {
     "source_path": "icon.png",
     "archive_path_when_packaged": "flowsteward_meta_ads/icon.png",
-    "sha256": "cba4b6739e3d63cd3875d0afa79127dee8d931478af80b3574ebc3a1cc740bf3",
+    "sha256": "e81950a8b57d2ae07b8210045363fd082f537614c09fb8c7df0252f55d2d4bf5",
     "provenance_path": "BRANDING.md",
-    "publication_visual_review": "PENDING: actual light/dark catalog cards and all target ZIPs",
-    "usage_review": "PENDING: Meta brand guidance requires login"
+    "publication_visual_review": "PASS: exact publisher PNG at32/64/128 on light/dark preparation cards; published catalog remains deferred",
+    "usage_review": "Publisher-owned fallback explicitly directed by ROOT; Meta corporate logo approval was not supplied",
+    "source_identity": "Flow Steward publisher-owned neutral mark; not Meta artwork"
   },
   "catalog_taxonomy": {
     "repository": "Flow-Steward/extensions",
@@ -32,8 +33,9 @@
     "verified_git_blob_sha": "ae5b8389889a921a5558914efe4ead4b985887ca"
   },
   "release_blockers": [
-    "Publication explicitly held; accept the exact CI run and source-bound ZIPs before a later release.",
-    "Branding usage and published catalog-card review remain separate publication acceptance."
+    "Published Core0.9.18 identity and ROOT GO remain required.",
+    "Final source-bound CI packaging/verify-plan and shared private publisher integration remain pending.",
+    "Public catalog and visibility are deferred to the owner; no public card is claimed."
   ],
   "live_acceptance": "PENDING: no Meta app or test advertising account was supplied.",
   "ci_plan": [
@@ -45,5 +47,5 @@
   ],
   "source_status": "Private CI candidate repository; the source SHA and ZIP hashes are bound by each generated release-plan.json.",
   "ci_repository": "Flow-Steward/ext-marketing-meta-ads",
-  "publication": "HOLD: no release, tag or catalog submission authorized"
+  "publication": "HOLD: private CI preparation; no tag/release before published Core0.9.18 and ROOT GO"
 }

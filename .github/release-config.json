@@ -15,5 +15,9 @@
     "tests/test_transport.py",
     "tests/test_setup_and_boundaries.py",
     "tests/test_packaging.py"
-  ]
+  ],
+  "additional_assets": [
+    "docs/releases/1.0.0.md"
+  ],
+  "notes_file": "docs/releases/1.0.0.md"
 }
