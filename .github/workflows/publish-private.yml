@@ -147,26 +147,6 @@ jobs:
           test "$(gh api repos/Flow-Steward/flow-steward-app/commits/v0.9.18 --jq .sha)" = "$CORE_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
           python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --catalog-root tooling
-      - name: Create immutable release tag only after verified prerequisites
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import os, tempfile, sys
-          sys.path.insert(0, 'tooling/scripts')
-          import publish_extension_release as shared
-          repository, sha = os.environ['GITHUB_REPOSITORY'], os.environ['GITHUB_SHA']
-          with tempfile.TemporaryDirectory(prefix='meta-ads-tag-') as isolated:
-              github = shared.GitHub(isolated)
-              shared._verify_repository(github, repository, 'private')
-              reference = github.api(f'repos/{repository}/git/ref/tags/v1.0.0', allow_missing=True)
-              if reference is None:
-                  result = github.run(['api', '--method', 'POST', f'repos/{repository}/git/refs', '-f', 'ref=refs/tags/v1.0.0', '-f', 'sha=' + sha])
-                  shared._require(result.returncode == 0, 'Tag creation failed or outcome unknown; no retry attempted')
-              shared._require(shared._tag_commit(github, repository, 'v1.0.0') == sha, 'Existing tag differs; refusing mutation')
-          PY
       - name: Publish and authenticate asset readback through the shared private guard
         env:
           GH_TOKEN: ${{ github.token }}

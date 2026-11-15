@@ -21,7 +21,7 @@ publish-private.yml is a SEPARATE manual workflow. It selects an exact successfu
 same-source CI run, checks its two native jobs/evidence, stages only listed plan
 payload, and reuses the shared verify-plan and publisher with
 --expected-visibility private. The read-only preflight must pass before the sole
-contents:write job; the shared private guard is reused before tag creation and
+contents:write job; the shared private guard is reused before publication and
 before/after release asset readback. No repository/package visibility or catalog
 API is called. No automatic push/tag/release trigger and no PAT is used.
 
@@ -29,9 +29,11 @@ ROOT GO must be recorded as repository variables META_ADS_RELEASE_APPROVED_SHA
 and META_ADS_RELEASE_APPROVED_CORE_SHA, matching the exact main/dispatch source and
 stable published Core v0.9.18 tag commit. They are intentionally NOT set during
 preparation. The release owner accepts host compatibility before recording that
-Core SHA; candidate CI remains pinned to the documented tested host. Creating the
-tag and uploading ZIPs happen in CI only after these conditions. Existing tags or
-assets are verified; conflicting or partial outcomes are not repaired or retried.
+Core SHA; candidate CI remains pinned to the documented tested host. The release
+owner supplies the immutable v1.0.0 tag at the approved source only after that GO,
+as required by the shared publisher. CI verifies it before uploading any ZIP;
+there is no local tag creation or repair path. Existing tags/assets are verified;
+conflicting or partial outcomes are not repaired or retried.
 
 Core2260894d4e13ada0452a681e0be616eb4463e7ab supplies the canonical fs-audit toolchain,
 lint registry and host validator. Its hosted-quality.sh is intentionally not reused:

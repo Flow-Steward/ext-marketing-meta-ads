@@ -182,7 +182,8 @@ Private release publication uses the separate manual `publish-private.yml` workf
 It consumes only a successful source-bound run of the native CI above. The release
 owner must accept the exact extension/Core identities and record ROOT GO after
 Core v0.9.18 is actually published. Preparation leaves those approvals unset.
-Both tag creation and release asset upload occur inside CI; the shared publisher
+After that GO, the release owner supplies the exact immutable tag. All ZIP builds
+and release asset uploads occur in CI; the shared publisher verifies the tag/source,
 requires the repository to remain private and verifies downloaded asset bytes.
 Public availability and catalog registration are later owner-controlled steps.
 The active icon is the Flow Steward publisher mark, not Meta artwork; provenance
