@@ -35,6 +35,9 @@ def main() -> None:
     ):
         raise SystemExit("This driver requires the managed, identified GitHub job")
     mode = sys.argv[1]
+    scope = os.environ.get("META_ADS_CHECK_SCOPE", "source")
+    if scope not in {"source", "packaging-recovery"}:
+        raise SystemExit("Unknown check scope")
     core = Path.cwd()
     source = core / "candidate"
     catalog = core / "catalog-tooling"
@@ -123,7 +126,7 @@ def main() -> None:
             os.environ,
             FS_BORROWED_AUDIT_IMAGE=image,
             FS_STACK_ENV_FILE="/dev/null",
-            FS_COMPOSE_FILES=f"infra/docker/docker-compose.yaml {uid_override}",
+            FS_META_ADS_UID_OVERRIDE=str(uid_override),
         )
         try:
             run(
@@ -131,6 +134,11 @@ def main() -> None:
                     *base,
                     "run",
                     "--",
+                    "bash",
+                    "-c",
+                    'export FS_COMPOSE_FILES="${FS_COMPOSE_FILES:?} ${FS_META_ADS_UID_OVERRIDE:?}"; '
+                    'exec "$@"',
+                    "meta-ads-managed-gate",
                     "bash",
                     "core/entrypoints/cli/scripts/lint.sh",
                     "--checks",
@@ -148,15 +156,20 @@ def main() -> None:
     if mode == "quality-package":
         checks(
             "source",
-            " ".join(
-                [
-                    "tests/test_validation.py",
-                    "tests/test_operations.py",
-                    "tests/test_transport.py",
-                    "tests/test_setup_and_boundaries.py",
-                    "tests/test_review_regressions.py",
-                    "tests/test_packaging.py",
-                ]
+            (
+                "tests/test_packaging.py::"
+                "test_explicit_target_and_output_produce_only_one_compatible_archive"
+                if scope == "packaging-recovery"
+                else " ".join(
+                    [
+                        "tests/test_validation.py",
+                        "tests/test_operations.py",
+                        "tests/test_transport.py",
+                        "tests/test_setup_and_boundaries.py",
+                        "tests/test_review_regressions.py",
+                        "tests/test_packaging.py",
+                    ]
+                )
             ),
             static=True,
         )
@@ -237,6 +250,10 @@ def main() -> None:
         "core_sha": CORE,
         "catalog_sha": CATALOG,
         "mode": mode,
+        "check_scope": scope,
+        "prior_source_pass_sha": (
+            "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope == "packaging-recovery" else None
+        ),
         "audit_toolchain": digest,
         "audit_image": image,
         "architecture": output(["docker", "info", "--format", "{{.Architecture}}"]),

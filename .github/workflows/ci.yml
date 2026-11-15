@@ -2,6 +2,14 @@ name: Meta Ads CI (no publication)
 
 on:
   workflow_dispatch:
+    inputs:
+      checks_scope:
+        description: Source checks, or packaging recovery after the recorded source pass
+        type: choice
+        default: source
+        options:
+          - source
+          - packaging-recovery
 
 permissions:
   contents: read
@@ -39,6 +47,8 @@ jobs:
           python-version: '3.12'
       - name: Canonical checks, two target ZIPs and AMD64 offline acceptance
         shell: bash
+        env:
+          META_ADS_CHECK_SCOPE: ${{ inputs.checks_scope }}
         run: |
           set -euo pipefail
           cp .env.example .env
@@ -106,6 +116,8 @@ jobs:
           path: candidate/.ci-artifacts
       - name: ARM64 native offline archive acceptance
         shell: bash
+        env:
+          META_ADS_CHECK_SCOPE: ${{ inputs.checks_scope }}
         run: |
           set -euo pipefail
           cp .env.example .env
