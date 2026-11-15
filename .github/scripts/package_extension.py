@@ -16,12 +16,18 @@ only the wheels that install on it and a .fs-package.yaml naming the target.
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import re
+import stat
+from email.parser import BytesParser
 import struct
 import subprocess
 import sys
 import zipfile
 from pathlib import Path, PurePosixPath
+
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 # The product bundler leaves these out (core/application/tooling/extensions/bundle_extension.py).
@@ -35,7 +41,17 @@ EXCLUDED_DIRECTORIES = {
     "dev-wheels",
 }
 EXCLUDED_FILES = {".fs-extension-install.yaml", ".fs-package.yaml"}
-REPOSITORY_TOOLING = {".github", "dist"}
+REPOSITORY_TOOLING = {
+    ".github",
+    "dist",
+    "tests",
+    "scripts",
+    "docs",
+    ".gitignore",
+    "pyproject.toml",
+    "requirements-dev.txt",
+    "requirements.in",
+}
 TARGETS = {"linux-amd64": "x86_64", "linux-arm64": "aarch64"}
 MAX_ZIP_BYTES = 50 * 1024 * 1024
 MAX_UNPACKED_BYTES = 150 * 1024 * 1024
@@ -102,46 +118,77 @@ def wheel_supports_target(name: str, target: str) -> bool:
     )
 
 
-def _write(out: Path, folder: str, files: list[str], *, target: str = "") -> None:
+def _check_locked_wheels(files: list[str]) -> None:
+    manifest = yaml.safe_load((ROOT / "extension.yaml").read_text())
+    requirements = manifest.get("python_requirements")
+    if not isinstance(requirements, list) or not requirements:
+        sys.exit("A native python_requirements lock is required")
+    locks = {}
+    for row in requirements:
+        key = (re.sub(r"[-_.]+", "-", row["name"]).lower(), row["version"])
+        locks[key] = set(row["hashes"])
+    found = set()
+    for name in files:
+        if not name.startswith("wheels/") or not name.endswith(".whl"):
+            continue
+        data = (ROOT / name).read_bytes()
+        digest = "sha256:" + hashlib.sha256(data).hexdigest()
+        with zipfile.ZipFile(ROOT / name) as wheel:
+            metadata = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA")]
+            if len(metadata) != 1:
+                sys.exit("Wheel must contain exactly one distribution metadata record")
+            row = BytesParser().parsebytes(wheel.read(metadata[0]))
+        key = (re.sub(r"[-_.]+", "-", str(row["Name"])).lower(), str(row["Version"]))
+        if key not in locks or digest not in locks[key]:
+            sys.exit("Wheel SHA256/name/version differs from python_requirements lock: " + name)
+        found.add(key)
+    if found != set(locks):
+        sys.exit("Missing compatible wheel for a locked runtime requirement")
+
+
+def _write(out: Path, folder: str, files: list[str], *, target: str) -> None:
     unpacked = 0
-    with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        contents = []
         for name in files:
-            archive.write(ROOT / name, arcname=f"{folder}/{name}")
-            unpacked += (ROOT / name).stat().st_size
-        if target:
-            archive.writestr(f"{folder}/.fs-package.yaml", f"runtime_target: {target}\n")
+            path = ROOT / name
+            if not path.is_file() or path.is_symlink():
+                sys.exit("Unsafe package input: " + name)
+            contents.append((name, path.read_bytes()))
+        contents.append((".fs-package.yaml", f"runtime_target: {target}\n".encode()))
+        for name, data in contents:
+            info = zipfile.ZipInfo(f"{folder}/{name}", (2020, 1, 1, 0, 0, 0))
+            info.create_system = 3
+            info.external_attr = (stat.S_IFREG | 0o644) << 16
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, data, compresslevel=9)
+            unpacked += len(data)
     size = out.stat().st_size
     if size > MAX_ZIP_BYTES or unpacked > MAX_UNPACKED_BYTES:
-        sys.exit(
-            f"{out.name}: {size} zipped / {unpacked} unpacked bytes exceed Flow Steward's install limits"
-        )
-    print(
-        f"{out.relative_to(ROOT)}  {size / 2**20:.1f} MB zipped, {unpacked / 2**20:.1f} MB unpacked"
-    )
+        sys.exit(f"{out.name}: installer archive-size limit exceeded")
+    print(f"{out} {size} zipped / {unpacked} unpacked bytes")
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--runtime-target", required=True, choices=sorted(TARGETS))
+    parser.add_argument("--out-dir", required=True, type=Path)
+    args = parser.parse_args()
     extension_id, version = manifest_field("extension_id"), manifest_field("version")
     folder = extension_id.replace(".", "_").replace("-", "_")
-    (ROOT / "dist").mkdir(exist_ok=True)
     files = shipped_files()
     problem = icon_problem((ROOT / ICON_FILE).read_bytes() if ICON_FILE in files else None)
     if problem:
         sys.exit(f"{extension_id} {version}: {problem}")
-    wheels = [
-        name for name in files if PurePosixPath(name).parts[0] == "wheels" and name.endswith(".whl")
+    files = [
+        name
+        for name in files
+        if not name.endswith(".whl") or wheel_supports_target(name, args.runtime_target)
     ]
-    per_target = any("any" not in _wheel_platforms(PurePosixPath(name).name) for name in wheels)
-    if not per_target:
-        _write(ROOT / "dist" / f"{extension_id}-{version}.zip", folder, files)
-        return 0
-    for target in TARGETS:
-        shipped = [
-            name for name in files if name not in wheels or wheel_supports_target(name, target)
-        ]
-        _write(
-            ROOT / "dist" / f"{extension_id}-{version}-{target}.zip", folder, shipped, target=target
-        )
+    _check_locked_wheels(files)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    destination = args.out_dir / f"{extension_id}-{version}-{args.runtime_target}.zip"
+    _write(destination, folder, files, target=args.runtime_target)
     return 0
 
 

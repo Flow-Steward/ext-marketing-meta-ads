@@ -32,9 +32,8 @@
     "verified_git_blob_sha": "ae5b8389889a921a5558914efe4ead4b985887ca"
   },
   "release_blockers": [
-    "No remote release repository, passing release CI, native dependency lock or immutable release ZIP.",
-    "Generate native locked target-specific AMD64/ARM64 packages and validate each archive.",
-    "Verify branding usage and actual catalog-card rendering; reconcile all shipped metadata and hashes."
+    "Publication explicitly held; accept the exact CI run and source-bound ZIPs before a later release.",
+    "Branding usage and published catalog-card review remain separate publication acceptance."
   ],
   "live_acceptance": "PENDING: no Meta app or test advertising account was supplied.",
   "ci_plan": [
@@ -44,5 +43,7 @@
     "Build native locked linux-amd64/linux-arm64 archives, validate catalog acceptance, and verify icon/provenance plus metadata bytes in each ZIP.",
     "Coordinate final Core compatibility and publication only after actual accepted Core CI and this extension readiness are confirmed."
   ],
-  "source_status": "Local development commits exist; no release source has been selected or published."
+  "source_status": "Private CI candidate repository; the source SHA and ZIP hashes are bound by each generated release-plan.json.",
+  "ci_repository": "Flow-Steward/ext-marketing-meta-ads",
+  "publication": "HOLD: no release, tag or catalog submission authorized"
 }

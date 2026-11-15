@@ -7,8 +7,11 @@ Runtime: CPython 3.12, public extension SDK 0.4.0+, `extension_host_v2`, Meta AP
 ## Release status
 
 This is an unpublished development candidate, separate from the Core 0.9.18
-extension release batch. Source commits are development history; no native package
-lock, release ZIP or passing release CI has been prepared yet.
+extension release batch. Runtime requirements are pinned by version and SHA-256 in
+`extension.yaml`; both native Pillow wheels are committed for offline installation.
+The manual CI in `.github/workflows/ci.yml` prepares separate AMD64 and ARM64 ZIPs,
+checks them with the canonical catalog inspector and tests native offline installation.
+Its artifacts are CI candidates; this workflow never creates a tag or GitHub Release.
 
 Account selection uses the native conditional configuration mutation (extension-host
 API 1.9.0 or later). It assigns only the selected account and its immutable anchor;
@@ -157,3 +160,20 @@ No paid-delivery test, installation or catalog publication is performed automati
 
 Runtime contracts live in YAML; README explains their use. Follow the target application's
 AGENTS.md, standards, extension authoring playbook and publication standard.
+
+## ZIP and CI preparation
+
+The CI repository is private `Flow-Steward/ext-marketing-meta-ads`; the canonical
+category is `marketing`. Run **Meta Ads CI (no publication)** manually on the intended
+source SHA. Checks use the pinned Core host in fs-audit through `lint.sh`; the tests
+with native Core adapters are included. A separate native ARM64 job installs the
+same ARM64 archive without network. No Meta credentials are supplied to either job.
+
+Each archive contains only its target's locked Pillow wheel and `.fs-package.yaml`.
+The source packager rejects an incorrect wheel hash or a missing compatible wheel.
+It omits CI tooling, tests, development wheels and draft catalog data from the runtime
+ZIP. Short/detailed/setup descriptions, examples, icon and branding provenance remain.
+
+The validated ZIPs and source-bound `release-plan.json` are retained as GitHub Actions
+artifacts for seven days. Download them before expiration. Publication is an explicit
+later operation; passing this CI does not certify live OAuth or Meta ad delivery.

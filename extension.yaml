@@ -30,6 +30,11 @@ features:
 required_scopes:
   - "extension:invoke"
   - "artifact:read"
+machine_auth:
+  service_account_key: "svc_ext_meta_ads"
+  required_scopes:
+    - "extension:invoke"
+    - "artifact:read"
 account_scope:
   scope_type: "project"
   description: "One selected advertising account per project connection."

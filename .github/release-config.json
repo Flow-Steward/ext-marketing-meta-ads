@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "extension_id": "flowsteward.meta-ads",
+  "runtime_targets": [
+    "linux-amd64",
+    "linux-arm64"
+  ],
+  "package_script": ".github/scripts/package_extension.py",
+  "test_requirements": [
+    "requirements-dev.txt"
+  ],
+  "test_paths": [
+    "tests/test_validation.py",
+    "tests/test_operations.py",
+    "tests/test_transport.py",
+    "tests/test_setup_and_boundaries.py",
+    "tests/test_packaging.py"
+  ]
+}

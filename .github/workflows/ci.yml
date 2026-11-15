@@ -1,0 +1,140 @@
+name: Meta Ads CI (no publication)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: meta-ads-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  quality-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out immutable Core host
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/flow-steward-app
+          ref: 2260894d4e13ada0452a681e0be616eb4463e7ab
+          persist-credentials: false
+      - name: Check out exact extension candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Check out mandatory local catalog inspector
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/extensions
+          ref: 4ad7b1131c72c381d6bcbb5613f209b077a01ce0
+          path: catalog-tooling
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Canonical checks, two target ZIPs and AMD64 offline acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          ci_owner="meta-ads-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_JOB}"
+          ci_registry="$RUNNER_TEMP/meta-ads-ownership"
+          cleanup() {
+            ci_status=$?
+            trap - EXIT
+            python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" cleanup --apply > "$RUNNER_TEMP/meta-ads-cleanup.json" || ci_status=1
+            exit "$ci_status"
+          }
+          trap cleanup EXIT
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" init > "$RUNNER_TEMP/meta-ads-init.json"
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" private-builder > "$RUNNER_TEMP/meta-ads-builder.json"
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" run -- python candidate/.github/scripts/ci_driver.py quality-package
+      - name: Save validated ZIPs and source-bound evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: meta-ads-packages-${{ github.sha }}
+          path: candidate/.ci-artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Save bounded diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: meta-ads-amd64-diagnostics-${{ github.run_attempt }}
+          path: |
+            logs/quality/
+            ${{ runner.temp }}/meta-ads-cleanup.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  verify-arm64:
+    needs: quality-package
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    steps:
+      - name: Check out immutable Core host
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/flow-steward-app
+          ref: 2260894d4e13ada0452a681e0be616eb4463e7ab
+          persist-credentials: false
+      - name: Check out exact extension candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Check out immutable catalog identity
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Flow-Steward/extensions
+          ref: 4ad7b1131c72c381d6bcbb5613f209b077a01ce0
+          path: catalog-tooling
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Download this exact run's validated ZIPs
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: meta-ads-packages-${{ github.sha }}
+          path: candidate/.ci-artifacts
+      - name: ARM64 native offline archive acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          ci_owner="meta-ads-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_JOB}"
+          ci_registry="$RUNNER_TEMP/meta-ads-ownership"
+          cleanup() {
+            ci_status=$?
+            trap - EXIT
+            python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" cleanup --apply > "$RUNNER_TEMP/meta-ads-cleanup.json" || ci_status=1
+            exit "$ci_status"
+          }
+          trap cleanup EXIT
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" init > "$RUNNER_TEMP/meta-ads-init.json"
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" private-builder > "$RUNNER_TEMP/meta-ads-builder.json"
+          python -m core.entrypoints.cli.agent_resources --registry "$ci_registry" --owner "$ci_owner" run -- python candidate/.github/scripts/ci_driver.py verify-arm64
+      - name: Save native ARM64 acceptance evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: meta-ads-arm64-evidence-${{ github.sha }}
+          path: candidate/.ci-artifacts/verify-arm64-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Save bounded diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: meta-ads-arm64-diagnostics-${{ github.run_attempt }}
+          path: |
+            logs/quality/
+            ${{ runner.temp }}/meta-ads-cleanup.json
+          if-no-files-found: warn
+          retention-days: 7

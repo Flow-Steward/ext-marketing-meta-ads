@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import shutil
+import os
 import subprocess
 import sys
 import zipfile
@@ -113,7 +114,11 @@ def test_missing_target_wheel_is_refused(package_source, tmp_path):
 
 def test_package_bytes_are_reproducible(package_source, tmp_path):
     first, second = tmp_path / "one", tmp_path / "two"
-    for out in (first, second):
+    for index, out in enumerate((first, second)):
+        if index:
+            for path in package_source.rglob("*"):
+                if path.is_file() and ".git" not in path.parts:
+                    os.utime(path, (1577836800, 1577836800))
         result = package(package_source, out, "linux-amd64")
         assert result.returncode == 0, result.stderr
     assert next(first.glob("*.zip")).read_bytes() == next(second.glob("*.zip")).read_bytes()
