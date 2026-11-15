@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Package this repository as a Flow Steward extension archive.
 
-    python3 .github/scripts/package_extension.py   ->  dist/<extension_id>-<version>.zip
-                                                       or, with per-architecture wheels,
-                                                       dist/<extension_id>-<version>-linux-amd64.zip
-                                                       dist/<extension_id>-<version>-linux-arm64.zip
+    python3 .github/scripts/package_extension.py --runtime-target linux-amd64 --out-dir dist
+    python3 .github/scripts/package_extension.py --runtime-target linux-arm64 --out-dir dist
+
+Each invocation writes dist/<extension_id>-<version>-<runtime-target>.zip.
 
 The archive is what ``flow-steward extensions bundle`` produces: every tracked
 file under one top folder named after the id (``.`` and ``-`` become ``_``),
