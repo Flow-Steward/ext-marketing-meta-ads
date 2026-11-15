@@ -1,0 +1,40 @@
+page_id: "setup"
+title: "Meta Ads setup"
+project_scoped: true
+components:
+  -
+    component_id: "meta_connections"
+    type: "connection_form"
+    title: "1. Authorize Meta"
+    data:
+      oauth_provider_id: "meta_ads_oauth"
+      connection_type: "meta_ads_account"
+      oauth_intent: "connect"
+  -
+    component_id: "account_binding"
+    type: "connection_form"
+    title: "2. Select an advertising account"
+    description: "Select an authorized connection below, enter the numeric account ID and click Verify and bind account. Use a new connection for another account."
+    fields:
+      -
+        field_id: "ad_account_id"
+        path: "ad_account_id"
+        label: "Advertising account ID"
+        widget: "text"
+        required: true
+    data:
+      connection_type: "meta_ads_account"
+      config_fields:
+        - "ad_account_id"
+      secret_fields: []
+      save_action: "bind_ad_account"
+      test_action: "list_ad_accounts"
+    ui_schema:
+      actions:
+        save_label: "Verify and bind account"
+        test_label: "List available advertising accounts"
+  -
+    component_id: "meta_setup_help"
+    type: "markdown"
+    title: "Before you connect"
+    body: "Configure your own Meta App with Marketing API and Facebook Login. Register the exact callback URL shown here, then save the App ID and Secret. Authorize Meta first. In the account selection section choose the new connection, list available accounts, enter its numeric ID and use Verify and bind account. Saving settings alone does not verify an account. Create a new connection to use another advertising account. New campaigns, groups and ads are paused; activation changes only the selected object. Meta App Review is managed by the operator. Live OAuth and paused creation acceptance are pending."

@@ -1,0 +1,793 @@
+operations:
+  -
+    operation_id: "list_ad_accounts"
+    display_name: "List ad accounts"
+    description: "Meta Ads v1: list ad accounts"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "cursor"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 2048
+      -
+        name: "limit"
+        value_type: "integer"
+        required: false
+        schema:
+          type: "integer"
+          minimum: 1
+          maximum: 100
+    outputs:
+      -
+        name: "accounts"
+        value_type: "array"
+      -
+        name: "next_cursor"
+        value_type: "text"
+    result_fields:
+      - "result.accounts"
+      - "result.next_cursor"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "list_ad_identities"
+    display_name: "List ad identities"
+    description: "Meta Ads v1: list ad identities"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "cursor"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 2048
+      -
+        name: "limit"
+        value_type: "integer"
+        required: false
+        schema:
+          type: "integer"
+          minimum: 1
+          maximum: 100
+    outputs:
+      -
+        name: "identities"
+        value_type: "array"
+      -
+        name: "next_cursor"
+        value_type: "text"
+    result_fields:
+      - "result.identities"
+      - "result.next_cursor"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "create_campaign"
+    display_name: "Create campaign"
+    description: "Meta Ads v1: create campaign"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "name"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "ad_category"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "general"
+    outputs:
+      -
+        name: "campaign_id"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+      -
+        name: "configured_status"
+        value_type: "text"
+      -
+        name: "effective_status"
+        value_type: "text"
+    result_fields:
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "create_ad_set"
+    display_name: "Create ad set"
+    description: "Meta Ads v1: create ad set"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "campaign_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "name"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "countries"
+        value_type: "array"
+        required: true
+        schema:
+          type: "array"
+          minItems: 1
+          maxItems: 50
+          items:
+            type: "string"
+            minLength: 2
+            maxLength: 2
+      -
+        name: "age_min"
+        value_type: "integer"
+        required: true
+        schema:
+          type: "integer"
+          minimum: 18
+          maximum: 65
+      -
+        name: "age_max"
+        value_type: "integer"
+        required: true
+        schema:
+          type: "integer"
+          minimum: 18
+          maximum: 65
+      -
+        name: "daily_budget"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "start_time"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          format: "date-time"
+      -
+        name: "end_time"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          format: "date-time"
+      -
+        name: "placements"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "facebook"
+            - "instagram"
+            - "both"
+      -
+        name: "dsa_beneficiary"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "dsa_payor"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+    outputs:
+      -
+        name: "ad_set_id"
+        value_type: "text"
+      -
+        name: "campaign_id"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+      -
+        name: "configured_status"
+        value_type: "text"
+      -
+        name: "effective_status"
+        value_type: "text"
+    result_fields:
+      - "result.ad_set_id"
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "upload_image"
+    display_name: "Upload image"
+    description: "Meta Ads v1: upload image"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "image_artifact"
+        value_type: "artifact_handle"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 512
+    outputs:
+      -
+        name: "image_hash"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+    result_fields:
+      - "result.image_hash"
+      - "result.ad_account_id"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "create_creative"
+    display_name: "Create creative"
+    description: "Meta Ads v1: create creative"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "name"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "image_hash"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "page_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "instagram_account_id"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "placements"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "facebook"
+            - "instagram"
+            - "both"
+      -
+        name: "primary_text"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 2000
+      -
+        name: "headline"
+        value_type: "text"
+        required: false
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 100
+      -
+        name: "destination_url"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 2048
+      -
+        name: "cta"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "LEARN_MORE"
+            - "SHOP_NOW"
+      -
+        name: "utm"
+        value_type: "object"
+        required: false
+        schema:
+          type: "object"
+          additionalProperties: false
+          properties:
+            utm_source:
+              type: "string"
+              minLength: 1
+              maxLength: 255
+            utm_medium:
+              type: "string"
+              minLength: 1
+              maxLength: 255
+            utm_campaign:
+              type: "string"
+              minLength: 1
+              maxLength: 255
+            utm_content:
+              type: "string"
+              minLength: 1
+              maxLength: 255
+            utm_term:
+              type: "string"
+              minLength: 1
+              maxLength: 255
+    outputs:
+      -
+        name: "creative_id"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+    result_fields:
+      - "result.creative_id"
+      - "result.ad_account_id"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "create_ad"
+    display_name: "Create ad"
+    description: "Meta Ads v1: create ad"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "name"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "ad_set_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "creative_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+    outputs:
+      -
+        name: "ad_id"
+        value_type: "text"
+      -
+        name: "ad_set_id"
+        value_type: "text"
+      -
+        name: "campaign_id"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+      -
+        name: "configured_status"
+        value_type: "text"
+      -
+        name: "effective_status"
+        value_type: "text"
+    result_fields:
+      - "result.ad_id"
+      - "result.ad_set_id"
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "set_delivery_status"
+    display_name: "Set delivery status"
+    description: "Meta Ads v1: set delivery status"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "object_type"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "campaign"
+            - "ad_set"
+            - "ad"
+      -
+        name: "object_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "status"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "ACTIVE"
+            - "PAUSED"
+    outputs:
+      -
+        name: "object_id"
+        value_type: "text"
+      -
+        name: "object_type"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+      -
+        name: "configured_status"
+        value_type: "text"
+      -
+        name: "effective_status"
+        value_type: "text"
+      -
+        name: "issues"
+        value_type: "array"
+      -
+        name: "parents"
+        value_type: "object"
+    result_fields:
+      - "result.object_id"
+      - "result.object_type"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+      - "result.issues"
+      - "result.parents"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    operation_id: "get_object_status"
+    display_name: "Get object status"
+    description: "Meta Ads v1: get object status"
+    operation_kind: "action"
+    workflow_visible: true
+    connection_type_ids:
+      - "meta_ads_account"
+    category: "advertising"
+    inputs:
+      -
+        name: "connection_ref"
+        value_type: "connection_ref"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+      -
+        name: "object_type"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+          enum:
+            - "campaign"
+            - "ad_set"
+            - "ad"
+      -
+        name: "object_id"
+        value_type: "text"
+        required: true
+        schema:
+          type: "string"
+          minLength: 1
+          maxLength: 255
+    outputs:
+      -
+        name: "object_id"
+        value_type: "text"
+      -
+        name: "object_type"
+        value_type: "text"
+      -
+        name: "ad_account_id"
+        value_type: "text"
+      -
+        name: "configured_status"
+        value_type: "text"
+      -
+        name: "effective_status"
+        value_type: "text"
+      -
+        name: "issues"
+        value_type: "array"
+      -
+        name: "parents"
+        value_type: "object"
+    result_fields:
+      - "result.object_id"
+      - "result.object_type"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+      - "result.issues"
+      - "result.parents"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"

@@ -1,0 +1,39 @@
+connection_types:
+  -
+    connection_type_id: "meta_ads_account"
+    display_name: "Meta advertising account"
+    description: "Authorize Meta, then verify and bind one advertising account."
+    auth:
+      type: "oauth2"
+      provider_id: "meta_ads_oauth"
+      scopes:
+        required:
+          - "ads_management"
+          - "pages_show_list"
+          - "pages_read_engagement"
+          - "pages_manage_ads"
+          - "instagram_basic"
+        optional: []
+    config_schema:
+      type: "object"
+      additionalProperties: false
+      properties:
+        oauth:
+          type: "object"
+          additionalProperties: true
+          readOnly: true
+        ad_account_id:
+          type: "string"
+          minLength: 1
+          maxLength: 32
+          title: "Advertising account ID"
+        bound_ad_account_id:
+          type: "string"
+          readOnly: true
+          maxLength: 32
+    secret_schema:
+      type: "object"
+      additionalProperties: false
+      properties:
+        access_token:
+          type: "string"

@@ -1,0 +1,11 @@
+artifact_policies:
+  -
+    operation_id: "upload_image"
+    inputs:
+      -
+        kind: "artifact"
+        value_type: "artifact_handle"
+        binding_key: "meta_image"
+        field: "image_artifact"
+        required: true
+        max_size_bytes: 5242880

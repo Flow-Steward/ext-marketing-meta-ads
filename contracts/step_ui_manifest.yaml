@@ -1,0 +1,279 @@
+forms:
+  -
+    operation_id: "list_ad_accounts"
+    title: "List ad accounts"
+    fields:
+      -
+        name: "cursor"
+        label: "Cursor"
+        widget_type: "text"
+        required: false
+      -
+        name: "limit"
+        label: "Limit"
+        widget_type: "number"
+        required: false
+  -
+    operation_id: "list_ad_identities"
+    title: "List ad identities"
+    fields:
+      -
+        name: "cursor"
+        label: "Cursor"
+        widget_type: "text"
+        required: false
+      -
+        name: "limit"
+        label: "Limit"
+        widget_type: "number"
+        required: false
+  -
+    operation_id: "create_campaign"
+    title: "Create campaign"
+    fields:
+      -
+        name: "name"
+        label: "Name"
+        widget_type: "text"
+        required: true
+      -
+        name: "ad_category"
+        label: "Ad category"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "General"
+            value: "general"
+  -
+    operation_id: "create_ad_set"
+    title: "Create ad set"
+    fields:
+      -
+        name: "campaign_id"
+        label: "Campaign id"
+        widget_type: "text"
+        required: true
+      -
+        name: "name"
+        label: "Name"
+        widget_type: "text"
+        required: true
+      -
+        name: "countries"
+        label: "Countries"
+        widget_type: "json"
+        required: true
+      -
+        name: "age_min"
+        label: "Age min"
+        widget_type: "number"
+        required: true
+      -
+        name: "age_max"
+        label: "Age max"
+        widget_type: "number"
+        required: true
+      -
+        name: "daily_budget"
+        label: "Daily budget"
+        widget_type: "text"
+        required: true
+        help_text: "Exact decimal amount in the connected account currency. No currency conversion or rounding."
+      -
+        name: "start_time"
+        label: "Start time"
+        widget_type: "text"
+        required: true
+        help_text: "ISO 8601 timestamp with timezone offset. Both start and end are required."
+      -
+        name: "end_time"
+        label: "End time"
+        widget_type: "text"
+        required: true
+        help_text: "ISO 8601 timestamp with timezone offset. Both start and end are required."
+      -
+        name: "placements"
+        label: "Placements"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Facebook"
+            value: "facebook"
+          -
+            label: "Instagram"
+            value: "instagram"
+          -
+            label: "Both"
+            value: "both"
+      -
+        name: "dsa_beneficiary"
+        label: "Dsa beneficiary"
+        widget_type: "text"
+        required: false
+      -
+        name: "dsa_payor"
+        label: "Dsa payor"
+        widget_type: "text"
+        required: false
+  -
+    operation_id: "upload_image"
+    title: "Upload image"
+    fields:
+      -
+        name: "image_artifact"
+        label: "Image artifact"
+        widget_type: "text"
+        required: true
+        help_text: "Map an image artifact from a previous step: JPEG/PNG, 1080 x 1080, at most 5 MiB."
+  -
+    operation_id: "create_creative"
+    title: "Create creative"
+    fields:
+      -
+        name: "name"
+        label: "Name"
+        widget_type: "text"
+        required: true
+      -
+        name: "image_hash"
+        label: "Image hash"
+        widget_type: "text"
+        required: true
+      -
+        name: "page_id"
+        label: "Page id"
+        widget_type: "text"
+        required: true
+      -
+        name: "instagram_account_id"
+        label: "Instagram account id"
+        widget_type: "text"
+        required: false
+      -
+        name: "placements"
+        label: "Placements"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Facebook"
+            value: "facebook"
+          -
+            label: "Instagram"
+            value: "instagram"
+          -
+            label: "Both"
+            value: "both"
+      -
+        name: "primary_text"
+        label: "Primary text"
+        widget_type: "text"
+        required: true
+      -
+        name: "headline"
+        label: "Headline"
+        widget_type: "text"
+        required: false
+      -
+        name: "destination_url"
+        label: "Destination url"
+        widget_type: "text"
+        required: true
+      -
+        name: "cta"
+        label: "Cta"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Learn more"
+            value: "LEARN_MORE"
+          -
+            label: "Shop now"
+            value: "SHOP_NOW"
+      -
+        name: "utm"
+        label: "Utm"
+        widget_type: "json"
+        required: false
+  -
+    operation_id: "create_ad"
+    title: "Create ad"
+    fields:
+      -
+        name: "name"
+        label: "Name"
+        widget_type: "text"
+        required: true
+      -
+        name: "ad_set_id"
+        label: "Ad set id"
+        widget_type: "text"
+        required: true
+      -
+        name: "creative_id"
+        label: "Creative id"
+        widget_type: "text"
+        required: true
+  -
+    operation_id: "set_delivery_status"
+    title: "Set delivery status"
+    fields:
+      -
+        name: "object_type"
+        label: "Object type"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Campaign"
+            value: "campaign"
+          -
+            label: "Ad set"
+            value: "ad_set"
+          -
+            label: "Ad"
+            value: "ad"
+      -
+        name: "object_id"
+        label: "Object id"
+        widget_type: "text"
+        required: true
+      -
+        name: "status"
+        label: "Status"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Active"
+            value: "ACTIVE"
+          -
+            label: "Paused"
+            value: "PAUSED"
+  -
+    operation_id: "get_object_status"
+    title: "Get object status"
+    fields:
+      -
+        name: "object_type"
+        label: "Object type"
+        widget_type: "select"
+        required: true
+        options:
+          -
+            label: "Campaign"
+            value: "campaign"
+          -
+            label: "Ad set"
+            value: "ad_set"
+          -
+            label: "Ad"
+            value: "ad"
+      -
+        name: "object_id"
+        label: "Object id"
+        widget_type: "text"
+        required: true

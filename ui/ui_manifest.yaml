@@ -1,0 +1,5 @@
+pages:
+  -
+    page_id: "setup"
+    title: "Setup"
+    ref: "pages/setup.yaml"

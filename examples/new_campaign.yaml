@@ -1,0 +1,362 @@
+workflow_id: "meta_ads_new_campaign"
+version: "1.0.0"
+display_name: "Meta ads new campaign"
+description: "Template requiring an installed Meta Ads extension and explicit project connection binding. Creates paused objects. Activation requires activate=true."
+enabled: false
+trigger:
+  confidence_threshold: 0.0
+settings:
+  execution_graph:
+    schema_version: 1
+    entry:
+      kind: "step"
+      id: "create_campaign"
+    edges:
+      -
+        source:
+          kind: "step"
+          id: "create_campaign"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "create_group"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "create_group"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "upload_image"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "upload_image"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "create_creative"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "create_creative"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "create_ad"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "create_ad"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "activate_requested"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "activate_requested"
+        outcome:
+          name: "true"
+        target:
+          kind: "step"
+          id: "activate_ad"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "activate_requested"
+        outcome:
+          name: "false"
+        target:
+          kind: "step"
+          id: "done"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "activate_ad"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "activate_group"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "activate_group"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "activate_campaign"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "activate_campaign"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "done"
+        rework: false
+  policies:
+    branch_strategy: "none"
+  callable:
+    enabled: true
+    trigger_channels:
+      - "ui"
+      - "api"
+      - "mcp"
+    input_mode: "fields"
+    strict_inputs: true
+    expected_inputs:
+      -
+        name: "campaign_name"
+        type: "string"
+        required: true
+      -
+        name: "ad_set_name"
+        type: "string"
+        required: true
+      -
+        name: "ad_name"
+        type: "string"
+        required: true
+      -
+        name: "countries"
+        type: "array"
+        required: true
+      -
+        name: "age_min"
+        type: "integer"
+        required: true
+      -
+        name: "age_max"
+        type: "integer"
+        required: true
+      -
+        name: "daily_budget"
+        type: "string"
+        required: true
+      -
+        name: "start_time"
+        type: "string"
+        required: true
+      -
+        name: "end_time"
+        type: "string"
+        required: true
+      -
+        name: "placements"
+        type: "string"
+        required: true
+      -
+        name: "dsa_beneficiary"
+        type: "string"
+        required: true
+      -
+        name: "dsa_payor"
+        type: "string"
+        required: true
+      -
+        name: "image_artifact"
+        type: "string"
+        required: true
+      -
+        name: "page_id"
+        type: "string"
+        required: true
+      -
+        name: "instagram_account_id"
+        type: "string"
+        required: false
+      -
+        name: "primary_text"
+        type: "string"
+        required: true
+      -
+        name: "destination_url"
+        type: "string"
+        required: true
+      -
+        name: "activate"
+        type: "boolean"
+        required: false
+        default: false
+    output_mode: "variables"
+    expected_outputs:
+      -
+        name: "ad_id"
+        type: "string"
+        required: false
+    expected_artifacts: []
+    side_effects:
+      - "Creates advertising objects in Meta; explicit activation can enable paid delivery."
+    allow_empty_inputs: false
+steps:
+  -
+    step_id: "create_campaign"
+    display_name: "Create campaign"
+    step_kind: "connector"
+    connector_id: "meta_ads.create_campaign"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "create_campaign"
+    input_mapping_jsonb:
+      name: "state.inputs.campaign_name"
+      ad_category: "literal:general"
+    output_mapping_jsonb:
+      campaign_id: "state.campaign_id"
+  -
+    step_id: "create_group"
+    display_name: "Create group"
+    step_kind: "connector"
+    connector_id: "meta_ads.create_ad_set"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "create_ad_set"
+    input_mapping_jsonb:
+      campaign_id: "state.campaign_id"
+      countries: "state.inputs.countries"
+      age_min: "state.inputs.age_min"
+      age_max: "state.inputs.age_max"
+      daily_budget: "state.inputs.daily_budget"
+      start_time: "state.inputs.start_time"
+      end_time: "state.inputs.end_time"
+      placements: "state.inputs.placements"
+      dsa_beneficiary: "state.inputs.dsa_beneficiary"
+      dsa_payor: "state.inputs.dsa_payor"
+      name: "state.inputs.ad_set_name"
+    output_mapping_jsonb:
+      ad_set_id: "state.ad_set_id"
+  -
+    step_id: "upload_image"
+    display_name: "Upload image"
+    step_kind: "connector"
+    connector_id: "meta_ads.upload_image"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "upload_image"
+    input_mapping_jsonb:
+      image_artifact: "state.inputs.image_artifact"
+    output_mapping_jsonb:
+      image_hash: "state.image_hash"
+  -
+    step_id: "create_creative"
+    display_name: "Create creative"
+    step_kind: "connector"
+    connector_id: "meta_ads.create_creative"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "create_creative"
+    input_mapping_jsonb:
+      name: "state.inputs.ad_name"
+      image_hash: "state.image_hash"
+      page_id: "state.inputs.page_id"
+      instagram_account_id: "state.inputs.instagram_account_id"
+      placements: "state.inputs.placements"
+      primary_text: "state.inputs.primary_text"
+      destination_url: "state.inputs.destination_url"
+      cta: "literal:LEARN_MORE"
+    output_mapping_jsonb:
+      creative_id: "state.creative_id"
+  -
+    step_id: "create_ad"
+    display_name: "Create ad"
+    step_kind: "connector"
+    connector_id: "meta_ads.create_ad"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "create_ad"
+    input_mapping_jsonb:
+      name: "state.inputs.ad_name"
+      ad_set_id: "state.ad_set_id"
+      creative_id: "state.creative_id"
+    output_mapping_jsonb:
+      ad_id: "state.ad_id"
+  -
+    step_id: "activate_requested"
+    display_name: "Explicit activation requested?"
+    step_kind: "if"
+    override:
+      if:
+        condition: "state.inputs.activate"
+  -
+    step_id: "activate_ad"
+    display_name: "Activate ad"
+    step_kind: "connector"
+    connector_id: "meta_ads.set_delivery_status"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "set_delivery_status"
+    input_mapping_jsonb:
+      object_type: "literal:ad"
+      object_id: "state.ad_id"
+      status: "literal:ACTIVE"
+    output_mapping_jsonb: {}
+  -
+    step_id: "activate_group"
+    display_name: "Activate group"
+    step_kind: "connector"
+    connector_id: "meta_ads.set_delivery_status"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "set_delivery_status"
+    input_mapping_jsonb:
+      object_type: "literal:ad_set"
+      object_id: "state.ad_set_id"
+      status: "literal:ACTIVE"
+    output_mapping_jsonb: {}
+  -
+    step_id: "activate_campaign"
+    display_name: "Activate campaign"
+    step_kind: "connector"
+    connector_id: "meta_ads.set_delivery_status"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "set_delivery_status"
+    input_mapping_jsonb:
+      object_type: "literal:campaign"
+      object_id: "state.campaign_id"
+      status: "literal:ACTIVE"
+    output_mapping_jsonb: {}
+  -
+    step_id: "done"
+    display_name: "Done"
+    step_kind: "stop_success"
+    override:
+      stop_success:
+        message: "Meta advertising objects created. Query effective status to inspect delivery."
+groups: []
+tags:
+  - "meta-ads"
+  - "example"

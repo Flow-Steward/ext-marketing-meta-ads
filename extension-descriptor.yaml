@@ -1,0 +1,41 @@
+schema_version: "extension_descriptor_v1"
+lifecycle:
+  data_schema_version: 1
+  data_migrations: []
+extension_id: "flowsteward.meta-ads"
+release_version: "1.0.0"
+extension_type: "service_extension"
+identity:
+  display_name: "Meta Ads"
+  description: |-
+    Meta Ads connects Flow Steward workflows to Facebook and Instagram advertising. Discover accessible advertising accounts and Page/Instagram identities, create campaigns and ad sets, upload an approved image artifact, build a creative and create an ad. Read object status and explicitly activate or pause one selected campaign, ad set or ad.
+
+    Use it to prepare a complete paused campaign or add a single-image ad to a compatible existing ad set. The supported profile is website traffic optimized for link clicks, with daily ad-set budgets, explicit country/age targeting and scheduled dates. Placements are Facebook Feed, Instagram Feed or both. New campaigns, ad sets and ads are paused; activation does not automatically activate parents or children, and ACTIVE does not prove approval or delivery.
+
+    Setup requires an operator-owned Meta app, native OAuth authorization and one selected advertising account per project connection. Instagram ads require an explicitly selected professional account linked to the selected Page. Images must be granted 1080 x 1080 JPEG/PNG artifacts up to 5 MiB. Video, carousel, organic posting, reporting, custom audiences, campaign budgets and special advertising categories are outside this version. Live OAuth and actual advertising-object acceptance have not been verified.
+  tags:
+    - "meta"
+    - "facebook"
+    - "instagram"
+vendor:
+  vendor_name: "Flow Steward"
+listing:
+  visibility: "private"
+  category: "marketing"
+distribution:
+  channel: "private_byo"
+  execution_modes:
+    - "local"
+  allows_self_hosted: true
+  requires_connected_control_plane: false
+  import_sources:
+    - "file"
+runtime:
+  contract_version: "extension_host_v2"
+  compatibility:
+    platform_min: "1.0.0"
+  extension_contract_v2:
+    connection_types: "contracts/connection_types.yaml"
+    operation_manifest: "contracts/operation_manifest.yaml"
+    step_ui_manifest: "contracts/step_ui_manifest.yaml"
+    artifact_policies: "contracts/artifact_policies.yaml"

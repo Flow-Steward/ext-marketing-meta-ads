@@ -1,0 +1,529 @@
+actions:
+  -
+    action_id: "list_ad_accounts"
+    title: "List ad accounts"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: false
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "cursor"
+        type: "string"
+        required: false
+      -
+        name: "limit"
+        type: "integer"
+        required: false
+    result_fields:
+      - "result.accounts"
+      - "result.next_cursor"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    action_id: "list_ad_identities"
+    title: "List ad identities"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: false
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "cursor"
+        type: "string"
+        required: false
+      -
+        name: "limit"
+        type: "integer"
+        required: false
+    result_fields:
+      - "result.identities"
+      - "result.next_cursor"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    action_id: "create_campaign"
+    title: "Create campaign"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "name"
+        type: "string"
+        required: true
+      -
+        name: "ad_category"
+        type: "string"
+        required: true
+    result_fields:
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "create_ad_set"
+    title: "Create ad set"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "campaign_id"
+        type: "string"
+        required: true
+      -
+        name: "name"
+        type: "string"
+        required: true
+      -
+        name: "countries"
+        type: "array"
+        required: true
+      -
+        name: "age_min"
+        type: "integer"
+        required: true
+      -
+        name: "age_max"
+        type: "integer"
+        required: true
+      -
+        name: "daily_budget"
+        type: "string"
+        required: true
+      -
+        name: "start_time"
+        type: "string"
+        required: true
+      -
+        name: "end_time"
+        type: "string"
+        required: true
+      -
+        name: "placements"
+        type: "string"
+        required: true
+      -
+        name: "dsa_beneficiary"
+        type: "string"
+        required: false
+      -
+        name: "dsa_payor"
+        type: "string"
+        required: false
+    result_fields:
+      - "result.ad_set_id"
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "upload_image"
+    title: "Upload image"
+    required_scopes:
+      - "extension:invoke"
+      - "artifact:read"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "image_artifact"
+        type: "artifact_handle"
+        required: true
+    result_fields:
+      - "result.image_hash"
+      - "result.ad_account_id"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "create_creative"
+    title: "Create creative"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "name"
+        type: "string"
+        required: true
+      -
+        name: "image_hash"
+        type: "string"
+        required: true
+      -
+        name: "page_id"
+        type: "string"
+        required: true
+      -
+        name: "instagram_account_id"
+        type: "string"
+        required: false
+      -
+        name: "placements"
+        type: "string"
+        required: true
+      -
+        name: "primary_text"
+        type: "string"
+        required: true
+      -
+        name: "headline"
+        type: "string"
+        required: false
+      -
+        name: "destination_url"
+        type: "string"
+        required: true
+      -
+        name: "cta"
+        type: "string"
+        required: true
+      -
+        name: "utm"
+        type: "object"
+        required: false
+    result_fields:
+      - "result.creative_id"
+      - "result.ad_account_id"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "create_ad"
+    title: "Create ad"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "name"
+        type: "string"
+        required: true
+      -
+        name: "ad_set_id"
+        type: "string"
+        required: true
+      -
+        name: "creative_id"
+        type: "string"
+        required: true
+    result_fields:
+      - "result.ad_id"
+      - "result.ad_set_id"
+      - "result.campaign_id"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "set_delivery_status"
+    title: "Set delivery status"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: true
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "object_type"
+        type: "string"
+        required: true
+      -
+        name: "object_id"
+        type: "string"
+        required: true
+      -
+        name: "status"
+        type: "string"
+        required: true
+    result_fields:
+      - "result.object_id"
+      - "result.object_type"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+      - "result.issues"
+      - "result.parents"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+    command_type: "invoke_extension_action"
+    test_mode_behavior: "suppress"
+  -
+    action_id: "get_object_status"
+    title: "Get object status"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: false
+    workflow_visible: true
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "object_type"
+        type: "string"
+        required: true
+      -
+        name: "object_id"
+        type: "string"
+        required: true
+    result_fields:
+      - "result.object_id"
+      - "result.object_type"
+      - "result.ad_account_id"
+      - "result.configured_status"
+      - "result.effective_status"
+      - "result.issues"
+      - "result.parents"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    action_id: "verify_meta_identity"
+    title: "Verify Meta authorization"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+    mutates_platform: false
+    workflow_visible: false
+    parameters: []
+    result_fields:
+      - "subject"
+      - "verified_display_name"
+      - "safe_metadata"
+      - "health"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
+  -
+    action_id: "bind_ad_account"
+    title: "Verify and bind advertising account"
+    required_scopes:
+      - "extension:invoke"
+    handler:
+      mode: "extension"
+      config:
+        runtime_resources:
+          project_connection: true
+        host_mutations:
+          - "project_connection_upsert"
+    command_type: "invoke_extension_action"
+    mutates_platform: true
+    workflow_visible: false
+    test_mode_behavior: "suppress"
+    parameters:
+      -
+        name: "connection_ref"
+        type: "connection_ref"
+        required: true
+      -
+        name: "ad_account_id"
+        type: "string"
+        required: true
+    result_fields:
+      - "result.ad_account_id"
+      - "result.currency"
+      - "result.timezone"
+      - "result.bound"
+    error_codes:
+      - "invalid_payload"
+      - "invalid_host_envelope"
+      - "invalid_connection"
+      - "authorization_required"
+      - "permission_denied"
+      - "not_found"
+      - "unsupported_configuration"
+      - "rate_limited"
+      - "provider_unavailable"
+      - "timeout_unknown"
+      - "artifact_unavailable"
+      - "external_effect_claim_required"
+      - "internal_error"
