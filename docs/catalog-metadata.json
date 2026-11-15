@@ -32,18 +32,17 @@
     "verified_git_blob_sha": "ae5b8389889a921a5558914efe4ead4b985887ca"
   },
   "release_blockers": [
-    "No committed source SHA, remote release repository, immutable ZIP or CI workflows.",
-    "Replace account setup upsert with the approved conditional config mutation; verify host API floor.",
-    "Finish and verify known artifact identity, opted-out creative and Facebook-only example regressions.",
-    "Generate native dependency lock and target-specific AMD64/ARM64 packages and validate each archive.",
+    "No remote release repository, passing release CI, native dependency lock or immutable release ZIP.",
+    "Generate native locked target-specific AMD64/ARM64 packages and validate each archive.",
     "Verify branding usage and actual catalog-card rendering; reconcile all shipped metadata and hashes."
   ],
   "live_acceptance": "PENDING: no Meta app or test advertising account was supplied.",
   "ci_plan": [
-    "Finish the agreed runtime corrections with observed focused RED/GREEN using managed Docker Tier 1 slots.",
+    "Retain focused regression evidence for the CAS/artifact/creative/workflow/HTTP408 fixes through managed Docker Tier 1 checks.",
     "On GitHub, run extension-static and affected extension-tests through the accepted Core lint registry; no host-test substitute.",
     "Verify standalone CI adapters preserve the real Core validator used by test_review_regressions.py; a bare scaffold runner is insufficient.",
     "Build native locked linux-amd64/linux-arm64 archives, validate catalog acceptance, and verify icon/provenance plus metadata bytes in each ZIP.",
     "Coordinate final Core compatibility and publication only after actual accepted Core CI and this extension readiness are confirmed."
-  ]
+  ],
+  "source_status": "Local development commits exist; no release source has been selected or published."
 }

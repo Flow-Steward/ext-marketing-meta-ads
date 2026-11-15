@@ -40,7 +40,37 @@ settings:
           name: "success"
         target:
           kind: "step"
+          id: "choose_creative_identity"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "choose_creative_identity"
+        outcome:
+          name: "true"
+        target:
+          kind: "step"
+          id: "create_creative_facebook"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "choose_creative_identity"
+        outcome:
+          name: "false"
+        target:
+          kind: "step"
           id: "create_creative"
+        rework: false
+      -
+        source:
+          kind: "step"
+          id: "create_creative_facebook"
+        outcome:
+          name: "success"
+        target:
+          kind: "step"
+          id: "create_ad"
         rework: false
       -
         source:
@@ -261,8 +291,35 @@ steps:
     output_mapping_jsonb:
       image_hash: "state.image_hash"
   -
+    step_id: "choose_creative_identity"
+    display_name: "Facebook-only placement?"
+    step_kind: "if"
+    override:
+      if:
+        condition: "state.inputs.placements == 'facebook'"
+  -
+    step_id: "create_creative_facebook"
+    display_name: "Create Facebook creative"
+    step_kind: "connector"
+    connector_id: "meta_ads.create_creative"
+    connection_binding_jsonb: {}
+    override:
+      connector:
+        extension_id: "flowsteward.meta-ads"
+        action_id: "create_creative"
+    input_mapping_jsonb:
+      name: "state.inputs.ad_name"
+      image_hash: "state.image_hash"
+      page_id: "state.inputs.page_id"
+      placements: "state.inputs.placements"
+      primary_text: "state.inputs.primary_text"
+      destination_url: "state.inputs.destination_url"
+      cta: "literal:LEARN_MORE"
+    output_mapping_jsonb:
+      creative_id: "state.creative_id"
+  -
     step_id: "create_creative"
-    display_name: "Create creative"
+    display_name: "Create creative with Instagram identity"
     step_kind: "connector"
     connector_id: "meta_ads.create_creative"
     connection_binding_jsonb: {}

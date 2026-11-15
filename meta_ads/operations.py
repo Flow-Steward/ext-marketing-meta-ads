@@ -322,11 +322,25 @@ def _image_owned(client: Any, connection: Connection, image_hash: str) -> None:
         )
 
 
+def _creative_features_disabled(spec: Any) -> bool:
+    if spec is None:
+        return True
+    if not isinstance(spec, dict) or set(spec) - {"creative_features_spec"}:
+        return False
+    features = spec.get("creative_features_spec", {})
+    return isinstance(features, dict) and all(
+        isinstance(feature, dict) and feature == {"enroll_status": "OPT_OUT"}
+        for feature in features.values()
+    )
+
+
 def _compatible_creative(
     client: Any, connection: Connection, creative_id: str, placements: str
 ) -> dict[str, Any]:
     row = objects.owned(client, connection, "creative", creative_id)
-    if row.get("asset_feed_spec") or row.get("degrees_of_freedom_spec"):
+    if row.get("asset_feed_spec") or not _creative_features_disabled(
+        row.get("degrees_of_freedom_spec")
+    ):
         raise objects.unsupported()
     story = mapping(row.get("object_story_spec"))
     link = mapping(story.get("link_data"))

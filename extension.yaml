@@ -77,7 +77,7 @@ runtime_grants:
   resources:
     project_connection: {}
   mutations:
-    project_connection_upsert: {}
+    project_connection_config_compare_and_set: {}
 runtime:
   contract_version: "extension_host_v2"
   extension_contract_v2:

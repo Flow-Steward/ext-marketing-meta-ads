@@ -50,7 +50,7 @@ def bind_account(payload: dict[str, Any], factory: Callable[..., Any]) -> dict[s
     if resource.get("connection_id", resource.get("id")) != ref:
         raise AdsError("invalid_connection", "The selected connection configuration is unavailable")
     config = mapping(resource.get("connection_config"))
-    if config.get("bound_ad_account_id") not in (None, desired):
+    if "bound_ad_account_id" in config and config["bound_ad_account_id"] != desired:
         raise AdsError(
             "invalid_connection", "Create a new connection for another advertising account"
         )
@@ -74,7 +74,6 @@ def bind_account(payload: dict[str, Any], factory: Callable[..., Any]) -> dict[s
         )
     if not isinstance(metadata.get("timezone_name"), str) or not metadata["timezone_name"]:
         raise AdsError("provider_unavailable", "Meta omitted the advertising account timezone")
-    config.update(ad_account_id=desired, bound_ad_account_id=desired)
     return {
         "ok": True,
         "result": {
@@ -85,7 +84,18 @@ def bind_account(payload: dict[str, Any], factory: Callable[..., Any]) -> dict[s
         },
         "host_mutations": [
             host_mutation(
-                "project_connection_upsert", {"connection_id": ref, "connection_config": config}
+                "project_connection_config_compare_and_set",
+                {
+                    "connection_id": ref,
+                    "expect": [
+                        {
+                            "path": "bound_ad_account_id",
+                            "state": "absent_or_equals",
+                            "value": desired,
+                        }
+                    ],
+                    "set": {"ad_account_id": desired, "bound_ad_account_id": desired},
+                },
             )
         ],
     }

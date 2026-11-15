@@ -6,17 +6,25 @@ Runtime: CPython 3.12, public extension SDK 0.4.0+, `extension_host_v2`, Meta AP
 
 ## Release status
 
-This is an unfinished development candidate, not part of the Core 0.9.18 extension
-release batch. There is no committed source release, native package lock, release ZIP
-or passing release CI yet. The account setup still uses the old upsert mutation;
-the approved CAS consumer change and the known artifact-selection, creative-compatibility
-and Facebook-only example regressions remain to be completed and verified.
+This is an unpublished development candidate, separate from the Core 0.9.18
+extension release batch. Source commits are development history; no native package
+lock, release ZIP or passing release CI has been prepared yet.
 
-The descriptor's `platform_min` is an extension-host API version, not the Core
-application version. Its current `1.0.0` declaration must be reviewed against the
-required host features when the CAS consumer is finished. Do not publish this draft
-catalog copy as an installable release or infer readiness from the separate Facebook
-and Instagram extensions' checks.
+Account selection uses the native conditional configuration mutation (extension-host
+API 1.9.0 or later). It assigns only the selected account and its immutable anchor;
+it never writes an OAuth snapshot. Same-account binding can be replayed, while a
+different or explicitly null anchor is refused. The host locks and checks the current
+configuration atomically; there is no fallback to unconditional upsert on older hosts.
+
+Existing creatives are accepted when all declared enhancement entries are explicitly
+`OPT_OUT`; enabled, malformed or other transformation specifications remain unsupported.
+The workflow examples select a Facebook-only creative path without an Instagram input,
+or an Instagram/both path with an explicit identity. Image input must match both the
+requested artifact ID and its `meta_image` binding. POST HTTP 408 remains an unknown
+write outcome even if Meta supplies a structured error code.
+
+Live OAuth and actual Meta object acceptance remain unverified. Local checks do not
+establish publication readiness or real advertising-account access.
 
 ## Supported profile
 

@@ -91,7 +91,13 @@ def test_facebook_example_has_a_creative_path_without_instagram_selector(file):
 
 
 @pytest.mark.parametrize(
-    "requested,binding", [("artifact:missing", "meta_image"), ("artifact:a", "other_image")]
+    "requested,binding",
+    [
+        ("artifact:missing", "meta_image"),
+        ("artifact:a", "other_image"),
+        ("artifact:", "meta_image"),
+        ("", "meta_image"),
+    ],
 )
 def test_missing_id_or_wrong_image_binding_cannot_fall_back(monkeypatch, requested, binding):
     payload = {

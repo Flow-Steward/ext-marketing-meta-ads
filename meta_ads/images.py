@@ -4,7 +4,7 @@ from __future__ import annotations
 import io
 from typing import Any
 from PIL import Image, UnidentifiedImageError
-from flowsteward_extension_sdk import stream_artifact_bytes
+from flowsteward_extension_sdk import find_artifact_descriptor, stream_artifact_bytes
 from .errors import AdsError
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
@@ -35,9 +35,13 @@ def read_image(payload: dict[str, Any], artifact: str) -> bytes:
     chunks = []
     size = 0
     try:
-        for chunk in stream_artifact_bytes(
-            payload, artifact_id=artifact, binding_key="meta_image", timeout_seconds=15.0
-        ):
+        requested_id = artifact.strip()
+        if not requested_id.removeprefix("artifact:").strip():
+            raise ValueError("An explicit image artifact ID is required")
+        descriptor = find_artifact_descriptor(payload, artifact_id=requested_id)
+        if descriptor.get("binding_key") != "meta_image":
+            raise ValueError("The artifact is not bound as the image input")
+        for chunk in stream_artifact_bytes(payload, artifact_id=requested_id, timeout_seconds=15.0):
             size += len(chunk)
             if size > MAX_IMAGE_BYTES:
                 raise AdsError("invalid_payload", "Image exceeds 5 MiB")

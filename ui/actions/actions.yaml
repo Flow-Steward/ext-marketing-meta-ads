@@ -494,7 +494,7 @@ actions:
         runtime_resources:
           project_connection: true
         host_mutations:
-          - "project_connection_upsert"
+          - "project_connection_config_compare_and_set"
     command_type: "invoke_extension_action"
     mutates_platform: true
     workflow_visible: false

@@ -113,8 +113,8 @@ class GraphClient:
         error = payload.get("error", {}) if isinstance(payload, dict) else {}
         raw_code = error.get("code") if isinstance(error, dict) else None
         code = raw_code if type(raw_code) is int else None
-        # A server failure or unstructured response after POST is always ambiguous.
-        if method == "POST" and (status >= 500 or code is None):
+        # A timeout, server failure or unstructured response after POST is ambiguous.
+        if method == "POST" and (status >= 500 or status == 408 or code is None):
             raise AdsError(
                 "timeout_unknown",
                 "The outcome of the Meta request is unknown",
