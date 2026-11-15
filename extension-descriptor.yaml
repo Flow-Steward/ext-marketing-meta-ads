@@ -7,12 +7,7 @@ release_version: "1.0.0"
 extension_type: "service_extension"
 identity:
   display_name: "Meta Ads"
-  description: |-
-    Meta Ads connects Flow Steward workflows to Facebook and Instagram advertising. Discover accessible advertising accounts and Page/Instagram identities, create campaigns and ad sets, upload an approved image artifact, build a creative and create an ad. Read object status and explicitly activate or pause one selected campaign, ad set or ad.
-
-    Use it to prepare a complete paused campaign or add a single-image ad to a compatible existing ad set. The supported profile is website traffic optimized for link clicks, with daily ad-set budgets, explicit country/age targeting and scheduled dates. Placements are Facebook Feed, Instagram Feed or both. New campaigns, ad sets and ads are paused; activation does not automatically activate parents or children, and ACTIVE does not prove approval or delivery.
-
-    Setup requires an operator-owned Meta app, native OAuth authorization and one selected advertising account per project connection. Instagram ads require an explicitly selected professional account linked to the selected Page. Images must be granted 1080 x 1080 JPEG/PNG artifacts up to 5 MiB. Video, carousel, organic posting, reporting, custom audiences, campaign budgets and special advertising categories are outside this version. Live OAuth and actual advertising-object acceptance have not been verified.
+  description: "Create paused website traffic campaigns and single-image Facebook and Instagram feed ads from workflows."
   tags:
     - "meta"
     - "facebook"
@@ -22,6 +17,14 @@ vendor:
 listing:
   visibility: "private"
   category: "marketing"
+  description: |-
+    Meta Ads connects Flow Steward workflows to Facebook and Instagram advertising. Discover accessible advertising accounts and Page/Instagram identities, create campaigns and ad sets, upload an approved image artifact, build a creative and create an ad. Read object status and explicitly activate or pause one selected campaign, ad set or ad.
+
+    Use it to prepare a complete paused campaign or add a single-image ad to a compatible existing ad set. The supported profile is website traffic optimized for link clicks, with daily ad-set budgets, explicit country/age targeting and scheduled dates. Placements are Facebook Feed, Instagram Feed or both. New campaigns, ad sets and ads are paused; activation does not automatically activate parents or children, and ACTIVE does not prove approval or delivery.
+
+    Setup requires an operator-owned Meta app, native OAuth authorization and one selected advertising account per project connection. Instagram ads require an explicitly selected professional account linked to the selected Page. Images must be granted 1080 x 1080 JPEG/PNG artifacts up to 5 MiB. Video, carousel, organic posting, reporting, custom audiences, campaign budgets and special advertising categories are outside this version. Live OAuth and actual advertising-object acceptance have not been verified.
+  summary: "Create paused website traffic campaigns and single-image Facebook and Instagram feed ads from workflows."
+  setup_summary: "Configure your own Meta app with Marketing API and Facebook Login, register the exact callback URL shown by Flow Steward, and save the App ID and secret in native OAuth setup. Authorize the required permissions, then verify and select one advertising account for the project connection. For Instagram select a linked professional account and Page. App Review, business verification and account permissions are managed by your operator."
 distribution:
   channel: "private_byo"
   execution_modes:
