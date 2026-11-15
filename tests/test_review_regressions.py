@@ -190,5 +190,8 @@ print(json.dumps({'creatives':creatives,'last':current,'visited':visited}))
     values = route["creatives"][0]
     from meta_ads.validation import creative_input
 
-    assert creative_input(values)["placements"] == placements
+    body = creative_input(values)
+    story = body["object_story_spec"]
+    assert story["link_data"]["image_hash"] == "a" * 32
+    assert ("instagram_user_id" in story) == (placements != "facebook")
     assert ("instagram_account_id" in values) == (placements != "facebook")
