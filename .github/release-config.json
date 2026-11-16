@@ -17,7 +17,7 @@
     "tests/test_packaging.py"
   ],
   "additional_assets": [
-    "docs/releases/1.0.0.md"
+    "docs/releases/1.0.1.md"
   ],
-  "notes_file": "docs/releases/1.0.0.md"
+  "notes_file": "docs/releases/1.0.1.md"
 }

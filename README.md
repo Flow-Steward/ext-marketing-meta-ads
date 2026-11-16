@@ -1,13 +1,13 @@
 # Meta Ads for Flow Steward
 
 Create paused website traffic campaigns, ad sets and single-image Facebook/Instagram feed ads
-through typed workflow actions. Extension ID: `flowsteward.meta-ads`, version `1.0.0`.
+through typed workflow actions. Extension ID: `flowsteward.meta-ads`, version `1.0.1`.
 Runtime: CPython 3.12, public extension SDK 0.4.0+, `extension_host_v2`, Meta API `v27.0`.
 
 ## Release status
 
-This is an unpublished development candidate, separate from the Core 0.9.18
-extension release batch. Runtime requirements are pinned by version and SHA-256 in
+Version 1.0.1 updates the original campaign icon and public release metadata.
+Runtime requirements are pinned by version and SHA-256 in
 `extension.yaml`; both native Pillow wheels are committed for offline installation.
 The manual CI in `.github/workflows/ci.yml` prepares separate AMD64 and ARM64 ZIPs,
 checks them with the canonical catalog inspector and tests native offline installation.
@@ -163,7 +163,7 @@ AGENTS.md, standards, extension authoring playbook and publication standard.
 
 ## ZIP and CI preparation
 
-The CI repository is private `Flow-Steward/ext-marketing-meta-ads`; the canonical
+The CI repository is public `Flow-Steward/ext-marketing-meta-ads`; the canonical
 category is `marketing`. Run **Meta Ads CI (no publication)** manually on the intended
 source SHA. Checks use the pinned Core host in fs-audit through `lint.sh`; the tests
 with native Core adapters are included. A separate native ARM64 job installs the
@@ -178,13 +178,17 @@ The validated ZIPs and source-bound `release-plan.json` are retained as GitHub A
 artifacts for seven days. Download them before expiration. Publication is an explicit
 later operation; passing this CI does not certify live OAuth or Meta ad delivery.
 
-Private release publication uses the separate manual `publish-private.yml` workflow.
-It consumes only a successful source-bound run of the native CI above. The release
-owner must accept the exact extension/Core identities and record ROOT GO after
-Core v0.9.18 is actually published. Preparation leaves those approvals unset.
-After that GO, the release owner supplies the exact immutable tag. All ZIP builds
-and release asset uploads occur in CI; the shared publisher verifies the tag/source,
-requires the repository to remain private and verifies downloaded asset bytes.
-Public availability and catalog registration are later owner-controlled steps.
-The active icon is the Flow Steward publisher mark, not Meta artwork; provenance
-and the provider-logo usage restriction are recorded in `BRANDING.md`.
+Public release publication uses the separate manual `publish.yml` workflow.
+It consumes only a successful source-bound `release-prep` run of the native CI above.
+The release owner records the exact approved extension SHA and published Core
+v0.9.18 SHA before supplying a new immutable tag. All ZIP builds and release
+asset uploads occur in CI; the shared publisher verifies the tag/source,
+requires the repository to remain public and verifies downloaded asset bytes.
+Catalog registration is coordinated separately by the catalog owner.
+
+Version 1.0.1 introduces an original violet campaign/megaphone icon. It is
+independent Flow Steward artwork, with provenance and SHA-256 in `BRANDING.md`.
+Runtime, permissions, OAuth configuration and dependencies are unchanged from
+1.0.0. The release-prep guard compares all runtime inputs to that accepted
+release, allowing only the version and public-reference listing metadata edits;
+packaging tests and both native archive checks run fresh.

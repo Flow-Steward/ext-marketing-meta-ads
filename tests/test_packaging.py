@@ -76,7 +76,7 @@ def test_explicit_target_and_output_produce_only_one_compatible_archive(package_
     out = tmp_path / "output"
     result = package(package_source, out, "linux-amd64")
     assert result.returncode == 0, result.stderr
-    expected = out / "flowsteward.meta-ads-1.0.0-linux-amd64.zip"
+    expected = out / "flowsteward.meta-ads-1.0.1-linux-amd64.zip"
     assert expected.is_file(), result.stdout
     assert list(out.iterdir()) == [expected]
     with zipfile.ZipFile(expected) as archive:

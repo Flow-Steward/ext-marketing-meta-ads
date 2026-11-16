@@ -1,8 +1,8 @@
 {
   "extension_id": "flowsteward.meta-ads",
   "display_name": "Meta Ads",
-  "planned_version": "1.0.0",
-  "readiness": "BLOCKED",
+  "planned_version": "1.0.1",
+  "readiness": "CI_PREPARATION",
   "include_in_core_0_9_18_release_batch": false,
   "source_sha": null,
   "release_zip_sha256": null,
@@ -21,11 +21,11 @@
   "icon": {
     "source_path": "icon.png",
     "archive_path_when_packaged": "flowsteward_meta_ads/icon.png",
-    "sha256": "e81950a8b57d2ae07b8210045363fd082f537614c09fb8c7df0252f55d2d4bf5",
+    "sha256": "a3e8a46ec3f24ceee55174b7be045ae8d1b57661fc6e707e20fa12562d750657",
     "provenance_path": "BRANDING.md",
-    "publication_visual_review": "PASS: exact publisher PNG at32/64/128 on light/dark preparation cards; published catalog remains deferred",
-    "usage_review": "Publisher-owned fallback explicitly directed by ROOT; Meta corporate logo approval was not supplied",
-    "source_identity": "Flow Steward publisher-owned neutral mark; not Meta artwork"
+    "publication_visual_review": "Local light/dark card-size review; public catalog review belongs to ROOT",
+    "usage_review": "Original generated artwork requested by owner; no provider marks",
+    "source_identity": "Original Flow Steward campaign megaphone"
   },
   "catalog_taxonomy": {
     "repository": "Flow-Steward/extensions",
@@ -33,19 +33,15 @@
     "verified_git_blob_sha": "ae5b8389889a921a5558914efe4ead4b985887ca"
   },
   "release_blockers": [
-    "Published Core0.9.18 identity and ROOT GO remain required.",
-    "Final source-bound CI packaging/verify-plan and shared private publisher integration remain pending.",
-    "Public catalog and visibility are deferred to the owner; no public card is claimed."
+    "Exact candidate hosted packaging and both native archive checks pending."
   ],
   "live_acceptance": "PENDING: no Meta app or test advertising account was supplied.",
   "ci_plan": [
-    "Retain focused regression evidence for the CAS/artifact/creative/workflow/HTTP408 fixes through managed Docker Tier 1 checks.",
-    "On GitHub, run extension-static and affected extension-tests through the accepted Core lint registry; no host-test substitute.",
-    "Verify standalone CI adapters preserve the real Core validator used by test_review_regressions.py; a bare scaffold runner is insufficient.",
-    "Build native locked linux-amd64/linux-arm64 archives, validate catalog acceptance, and verify icon/provenance plus metadata bytes in each ZIP.",
-    "Coordinate final Core compatibility and publication only after actual accepted Core CI and this extension readiness are confirmed."
+    "Run extension-static and tests/test_packaging.py, then tests/test_package_install.py on both native architectures through hosted fs-audit.",
+    "Verify runtime inputs match accepted 1.0.0 with only exact version/listing metadata changes.",
+    "Publish new immutable 1.0.1 through shared public CI publisher; ROOT owns catalog update."
   ],
-  "source_status": "Private CI candidate repository; the source SHA and ZIP hashes are bound by each generated release-plan.json.",
+  "source_status": "Public source repository; exact source and ZIP hashes are bound by generated release-plan.json.",
   "ci_repository": "Flow-Steward/ext-marketing-meta-ads",
-  "publication": "HOLD: private CI preparation; no tag/release before published Core0.9.18 and ROOT GO"
+  "publication": "Authorized original-icon 1.0.1; await exact candidate CI before publication."
 }

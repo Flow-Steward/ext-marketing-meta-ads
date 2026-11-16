@@ -1,4 +1,4 @@
-name: Publish private Meta Ads release
+name: Publish public Meta Ads release
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: meta-ads-private-release
+  group: meta-ads-public-release
   cancel-in-progress: false
 
 jobs:
@@ -62,7 +62,7 @@ jobs:
           python-version: '3.12'
       - name: Install trusted inspector dependency
         run: python -m pip install PyYAML==6.0.3
-      - name: Assert private identity with the shared guard
+      - name: Assert public identity with the shared guard
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -70,8 +70,8 @@ jobs:
           import os, sys, tempfile
           sys.path.insert(0, 'tooling/scripts')
           import publish_extension_release as shared
-          with tempfile.TemporaryDirectory(prefix='meta-ads-private-check-') as isolated:
-              shared._verify_repository(shared.GitHub(isolated), os.environ['GITHUB_REPOSITORY'], 'private')
+          with tempfile.TemporaryDirectory(prefix='meta-ads-public-check-') as isolated:
+              shared._verify_repository(shared.GitHub(isolated), os.environ['GITHUB_REPOSITORY'], 'public')
           PYTHON
       - name: Download selected CI packages
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
@@ -91,18 +91,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "quality-package" and .architecture == "x86_64" and .check_scope == "release-prep" and .runtime_source_inputs_equal == "b5edea676a18bc208ca6a530e63e5261d6775ee9"' downloaded/packages/quality-package-evidence.json
+          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "quality-package" and .architecture == "x86_64" and .check_scope == "release-prep" and .runtime_implementation_equal == "0e03a61d954e4c25bb43222f56afd1133749c031"' downloaded/packages/quality-package-evidence.json
           jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "verify-arm64" and .architecture == "aarch64" and .check_scope == "release-prep"' downloaded/arm64/verify-arm64-evidence.json
           mkdir payload
-          cp downloaded/packages/flowsteward.meta-ads-1.0.0-linux-amd64.zip payload/
-          cp downloaded/packages/flowsteward.meta-ads-1.0.0-linux-arm64.zip payload/
-          cp downloaded/packages/1.0.0.md payload/
+          cp downloaded/packages/flowsteward.meta-ads-1.0.1-linux-amd64.zip payload/
+          cp downloaded/packages/flowsteward.meta-ads-1.0.1-linux-arm64.zip payload/
+          cp downloaded/packages/1.0.1.md payload/
           cp downloaded/packages/release-plan.json payload/
-          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --catalog-root tooling
-      - name: Retain this run's verified private publication payload
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --catalog-root tooling
+      - name: Retain this run's verified public publication payload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: private-release-payload-${{ github.sha }}
+          name: public-release-payload-${{ github.sha }}
           path: payload/*
           if-no-files-found: error
           retention-days: 7
@@ -129,7 +129,7 @@ jobs:
       - name: Download only this run's validated payload
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
         with:
-          name: private-release-payload-${{ github.sha }}
+          name: public-release-payload-${{ github.sha }}
           path: payload
       - name: Recheck exact approval, Core publication and source-bound artifacts
         env:
@@ -146,9 +146,9 @@ jobs:
             jq -e '.draft == false and .prerelease == false and (.published_at | type == "string")'
           test "$(gh api repos/Flow-Steward/flow-steward-app/commits/v0.9.18 --jq .sha)" = "$CORE_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
-          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --catalog-root tooling
-      - name: Publish and authenticate asset readback through the shared private guard
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --catalog-root tooling
+      - name: Publish and authenticate asset readback through the shared public guard
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python tooling/scripts/publish_extension_release.py --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.0 --source-sha "$GITHUB_SHA" --expected-visibility private
+          python tooling/scripts/publish_extension_release.py --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --expected-visibility public

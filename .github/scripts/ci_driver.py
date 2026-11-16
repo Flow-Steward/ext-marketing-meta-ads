@@ -14,6 +14,7 @@ from typing import Any
 CORE = "2260894d4e13ada0452a681e0be616eb4463e7ab"
 CATALOG = "02c0f6f19b665c46300d42e790ef74375f3d0e67"
 REPOSITORY = "Flow-Steward/ext-marketing-meta-ads"
+RELEASE_BASE = "0e03a61d954e4c25bb43222f56afd1133749c031"
 
 
 def run(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[Any]:
@@ -51,7 +52,7 @@ def main() -> None:
         raise SystemExit("Extension checkout differs from the dispatched SHA")
     run(["git", "-C", str(source), "diff", "--quiet", "HEAD", "--"])
     if scope == "release-prep":
-        # Reuse runtime evidence only when its complete source inputs are unchanged.
+        # Only release metadata/artwork and freshly tested packaging inputs may differ.
         run(
             [
                 "git",
@@ -59,7 +60,7 @@ def main() -> None:
                 str(source),
                 "diff",
                 "--quiet",
-                "b5edea676a18bc208ca6a530e63e5261d6775ee9",
+                RELEASE_BASE,
                 sha,
                 "--",
                 ".",
@@ -68,15 +69,36 @@ def main() -> None:
                 ":(exclude)README.md",
                 ":(exclude)BRANDING.md",
                 ":(exclude)icon.png",
-                ":(exclude)branding/meta-logo-source.png",
+                ":(exclude)extension.yaml",
+                ":(exclude)extension-descriptor.yaml",
+                ":(exclude)tests/test_packaging.py",
+                ":(exclude)tests/test_package_install.py",
             ]
         )
+        # Compare full bytes after the three exact permitted release metadata edits.
+        # Permissions, grants, runtime and dependencies cannot be normalized away.
+        for name, edits in {
+            "extension.yaml": [('version: "1.0.0"\n', 'version: "1.0.1"\n')],
+            "extension-descriptor.yaml": [
+                ('release_version: "1.0.0"\n', 'release_version: "1.0.1"\n'),
+                ('  visibility: "private"\n', '  visibility: "public_reference"\n'),
+            ],
+        }.items():
+            expected = subprocess.check_output(
+                ["git", "-C", str(source), "show", f"{RELEASE_BASE}:{name}"]
+            )
+            for before, after in edits:
+                if expected.count(before.encode()) != 1:
+                    raise SystemExit("Release metadata baseline is ambiguous")
+                expected = expected.replace(before.encode(), after.encode(), 1)
+            if (source / name).read_bytes() != expected:
+                raise SystemExit(f"Unexpected runtime/permission or metadata change: {name}")
     registry = Path(os.environ["RUNNER_TEMP"]) / "meta-ads-ownership"
     owner = os.environ["FS_TASK_RESOURCE_OWNER"]
     scratch = Path(os.environ["FS_TASK_SCRATCH"])
     artifact = source / ".ci-artifacts"
     artifact.mkdir(exist_ok=True)
-    # The Docker context contains only immutable Core files, not this private candidate.
+    # The Docker context contains only immutable Core files, not the extension candidate.
     export = scratch / "core-context"
     export.mkdir()
     archive = scratch / "core.tar"
@@ -251,7 +273,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.0",
+                "v1.0.1",
                 "--config",
                 ".github/release-config.json",
                 "--out-dir",
@@ -269,7 +291,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.0",
+                "v1.0.1",
                 "--source-sha",
                 sha,
                 "--catalog-root",
@@ -296,8 +318,11 @@ def main() -> None:
         "prior_source_pass_sha": (
             "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope != "source" else None
         ),
-        "runtime_source_inputs_equal": (
-            "b5edea676a18bc208ca6a530e63e5261d6775ee9" if scope == "release-prep" else None
+        "runtime_implementation_equal": RELEASE_BASE if scope == "release-prep" else None,
+        "permitted_release_metadata": (
+            ["version:1.0.0->1.0.1", "listing.visibility:private->public_reference"]
+            if scope == "release-prep"
+            else None
         ),
         "prior_amd64_archive_pass": (
             {"source_sha": "76130f1cb4b64a21cdd23492f43510baf60aaff7", "run_id": 43762111336}

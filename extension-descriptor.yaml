@@ -3,7 +3,7 @@ lifecycle:
   data_schema_version: 1
   data_migrations: []
 extension_id: "flowsteward.meta-ads"
-release_version: "1.0.0"
+release_version: "1.0.1"
 extension_type: "service_extension"
 identity:
   display_name: "Meta Ads"
@@ -15,7 +15,7 @@ identity:
 vendor:
   vendor_name: "Flow Steward"
 listing:
-  visibility: "private"
+  visibility: "public_reference"
   category: "marketing"
   description: |-
     Meta Ads connects Flow Steward workflows to Facebook and Instagram advertising. Discover accessible advertising accounts and Page/Instagram identities, create campaigns and ad sets, upload an approved image artifact, build a creative and create an ad. Read object status and explicitly activate or pause one selected campaign, ad set or ad.
