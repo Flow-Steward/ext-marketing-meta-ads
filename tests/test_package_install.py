@@ -11,13 +11,15 @@ import venv
 import zipfile
 import yaml
 
+from test_support import assert_support_page
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_archive_installs_offline_on_the_native_runner(tmp_path):
     target = {"x86_64": "linux-amd64", "aarch64": "linux-arm64"}[platform.machine()]
     artifacts = ROOT / ".ci-artifacts"
-    path = artifacts / f"flowsteward.meta-ads-1.0.2-{target}.zip"
+    path = artifacts / f"flowsteward.meta-ads-1.0.3-{target}.zip"
     assert path.is_file(), "Required CI archive is absent"
     plan = json.loads((artifacts / "release-plan.json").read_text())
     asset = next(row for row in plan["assets"] if row["filename"] == path.name)
@@ -29,10 +31,11 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
             assert not rel.is_absolute() and ".." not in rel.parts
         archive.extractall(tmp_path / "unpacked")
     extension = tmp_path / "unpacked/flowsteward_meta_ads"
+    assert_support_page(extension)
     manifest = yaml.safe_load((extension / "extension.yaml").read_text())
     metadata = yaml.safe_load((extension / ".fs-package.yaml").read_text())
     assert metadata["runtime_target"] == target
-    assert manifest["version"] == "1.0.2"
+    assert manifest["version"] == "1.0.3"
     assert hashlib.sha256((extension / "icon.png").read_bytes()).hexdigest() == (
         "a3e8a46ec3f24ceee55174b7be045ae8d1b57661fc6e707e20fa12562d750657"
     )

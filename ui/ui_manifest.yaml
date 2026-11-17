@@ -3,3 +3,7 @@ pages:
     page_id: "setup"
     title: "Setup"
     ref: "pages/setup.yaml"
+  -
+    page_id: "support"
+    title: "Support"
+    ref: "pages/support.yaml"
