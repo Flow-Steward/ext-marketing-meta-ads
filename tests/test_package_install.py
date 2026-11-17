@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_archive_installs_offline_on_the_native_runner(tmp_path):
     target = {"x86_64": "linux-amd64", "aarch64": "linux-arm64"}[platform.machine()]
     artifacts = ROOT / ".ci-artifacts"
-    path = artifacts / f"flowsteward.meta-ads-1.0.1-{target}.zip"
+    path = artifacts / f"flowsteward.meta-ads-1.0.2-{target}.zip"
     assert path.is_file(), "Required CI archive is absent"
     plan = json.loads((artifacts / "release-plan.json").read_text())
     asset = next(row for row in plan["assets"] if row["filename"] == path.name)
@@ -32,7 +32,7 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
     manifest = yaml.safe_load((extension / "extension.yaml").read_text())
     metadata = yaml.safe_load((extension / ".fs-package.yaml").read_text())
     assert metadata["runtime_target"] == target
-    assert manifest["version"] == "1.0.1"
+    assert manifest["version"] == "1.0.2"
     assert hashlib.sha256((extension / "icon.png").read_bytes()).hexdigest() == (
         "a3e8a46ec3f24ceee55174b7be045ae8d1b57661fc6e707e20fa12562d750657"
     )
@@ -89,7 +89,7 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
         [
             str(python),
             "-c",
-            "from PIL import Image; import PIL; assert PIL.__version__ == '12.3.0'; Image.new('RGB',(1,1)).load()",
+            "from PIL import Image; import PIL; assert PIL.__version__ == '13.0.0'; Image.new('RGB',(1,1)).load()",
         ],
         check=True,
     )
@@ -111,6 +111,37 @@ def test_archive_installs_offline_on_the_native_runner(tmp_path):
         check=False,
     )
     assert imported.returncode == 0, imported.stderr
+    decoded = subprocess.run(
+        [
+            str(python),
+            "-c",
+            """
+import io
+import PIL
+from PIL import Image
+from meta_ads.images import validate_image
+from meta_ads.errors import AdsError
+assert PIL.__version__ == '13.0.0'
+for mode, fmt in [('RGB', 'JPEG'), ('RGBA', 'PNG')]:
+    stream = io.BytesIO()
+    Image.new(mode, (1080, 1080)).save(stream, format=fmt)
+    data = stream.getvalue()
+    assert validate_image(data) == data
+try:
+    validate_image(b'not an image')
+except AdsError as error:
+    assert error.code == 'invalid_payload'
+else:
+    raise AssertionError('Invalid image accepted')
+""",
+        ],
+        cwd=extension,
+        env=runtime_env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert decoded.returncode == 0, decoded.stderr
     request = {
         "contract_version": "extension_host_v2",
         "mode": "handshake",

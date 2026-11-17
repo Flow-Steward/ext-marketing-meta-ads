@@ -91,14 +91,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "quality-package" and .architecture == "x86_64" and .check_scope == "release-prep" and .runtime_implementation_equal == "0e03a61d954e4c25bb43222f56afd1133749c031"' downloaded/packages/quality-package-evidence.json
-          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "verify-arm64" and .architecture == "aarch64" and .check_scope == "release-prep"' downloaded/arm64/verify-arm64-evidence.json
+          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "quality-package" and .architecture == "x86_64" and .check_scope == "source" and .prior_source_pass_sha == null and .runtime_implementation_equal == null' downloaded/packages/quality-package-evidence.json
+          jq -e --arg sha "$GITHUB_SHA" '.source_sha == $sha and .mode == "verify-arm64" and .architecture == "aarch64" and .check_scope == "source" and .prior_source_pass_sha == null' downloaded/arm64/verify-arm64-evidence.json
           mkdir payload
-          cp downloaded/packages/flowsteward.meta-ads-1.0.1-linux-amd64.zip payload/
-          cp downloaded/packages/flowsteward.meta-ads-1.0.1-linux-arm64.zip payload/
-          cp downloaded/packages/1.0.1.md payload/
+          cp downloaded/packages/flowsteward.meta-ads-1.0.2-linux-amd64.zip payload/
+          cp downloaded/packages/flowsteward.meta-ads-1.0.2-linux-arm64.zip payload/
+          cp downloaded/packages/1.0.2.md payload/
           cp downloaded/packages/release-plan.json payload/
-          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --catalog-root tooling
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.2 --source-sha "$GITHUB_SHA" --catalog-root tooling
       - name: Retain this run's verified public publication payload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
@@ -146,9 +146,9 @@ jobs:
             jq -e '.draft == false and .prerelease == false and (.published_at | type == "string")'
           test "$(gh api repos/Flow-Steward/flow-steward-app/commits/v0.9.18 --jq .sha)" = "$CORE_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
-          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --catalog-root tooling
+          python tooling/scripts/release_extension.py verify-plan --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.2 --source-sha "$GITHUB_SHA" --catalog-root tooling
       - name: Publish and authenticate asset readback through the shared public guard
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python tooling/scripts/publish_extension_release.py --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.1 --source-sha "$GITHUB_SHA" --expected-visibility public
+          python tooling/scripts/publish_extension_release.py --artifact-dir payload --repository "$GITHUB_REPOSITORY" --tag v1.0.2 --source-sha "$GITHUB_SHA" --expected-visibility public

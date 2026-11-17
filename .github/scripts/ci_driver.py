@@ -217,6 +217,7 @@ def main() -> None:
                     else " ".join(
                         [
                             "tests/test_validation.py",
+                            "tests/test_image_security.py",
                             "tests/test_operations.py",
                             "tests/test_transport.py",
                             "tests/test_setup_and_boundaries.py",
@@ -273,7 +274,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.1",
+                "v1.0.2",
                 "--config",
                 ".github/release-config.json",
                 "--out-dir",
@@ -291,7 +292,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.1",
+                "v1.0.2",
                 "--source-sha",
                 sha,
                 "--catalog-root",
