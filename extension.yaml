@@ -4,7 +4,7 @@ lifecycle:
   data_migrations: []
 extension_id: "flowsteward.meta-ads"
 kind: "tool_provider"
-version: "1.0.1"
+version: "1.0.2"
 display_name: "Meta Ads"
 description: "Create paused website traffic campaigns and single-image Facebook and Instagram feed ads from workflows."
 vendor:
@@ -178,7 +178,7 @@ callbacks:
 python_requirements:
   -
     name: "pillow"
-    version: "12.3.0"
+    version: "13.0.0"
     hashes:
-      - "sha256:d9c7f76c0673154f044e9d78c8655fb4213f6ca31a836df48b40fe5d187717b9"
-      - "sha256:78cb2c6865a35ab8ff8b75fd122f6033b92a62c82801110e48ddd6c936a45d91"
+      - "sha256:8bf295fe459343bc6093c8e5e0df60bfa189e0fcb775a22e2c2488fdeccc6c0d"
+      - "sha256:42d63be3af4f9b951b199b0a9d23365d37ab14687e6d77b74940432c8515c4ca"

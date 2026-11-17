@@ -11,13 +11,14 @@
   ],
   "test_paths": [
     "tests/test_validation.py",
+    "tests/test_image_security.py",
     "tests/test_operations.py",
     "tests/test_transport.py",
     "tests/test_setup_and_boundaries.py",
     "tests/test_packaging.py"
   ],
   "additional_assets": [
-    "docs/releases/1.0.1.md"
+    "docs/releases/1.0.2.md"
   ],
-  "notes_file": "docs/releases/1.0.1.md"
+  "notes_file": "docs/releases/1.0.2.md"
 }

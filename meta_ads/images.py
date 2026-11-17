@@ -14,7 +14,7 @@ def validate_image(data: bytes) -> bytes:
     if not isinstance(data, bytes) or not data or len(data) > MAX_IMAGE_BYTES:
         raise AdsError("invalid_payload", "Image must be at most 5 MiB")
     try:
-        with Image.open(io.BytesIO(data)) as image:
+        with Image.open(io.BytesIO(data), formats=("JPEG", "PNG")) as image:
             if (
                 image.format not in {"JPEG", "PNG"}
                 or image.size != (1080, 1080)
@@ -22,7 +22,7 @@ def validate_image(data: bytes) -> bytes:
             ):
                 raise AdsError("invalid_payload", "Use a single 1080 x 1080 JPEG or PNG image")
             image.verify()
-        with Image.open(io.BytesIO(data)) as image:
+        with Image.open(io.BytesIO(data), formats=("JPEG", "PNG")) as image:
             image.load()
     except AdsError:
         raise
