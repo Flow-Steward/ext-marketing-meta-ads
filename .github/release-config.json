@@ -10,6 +10,7 @@
     "requirements-dev.txt"
   ],
   "test_paths": [
+    "tests/test_support.py",
     "tests/test_validation.py",
     "tests/test_image_security.py",
     "tests/test_operations.py",

@@ -216,6 +216,7 @@ def main() -> None:
                     if scope == "release-prep"
                     else " ".join(
                         [
+                            "tests/test_support.py",
                             "tests/test_validation.py",
                             "tests/test_image_security.py",
                             "tests/test_operations.py",
