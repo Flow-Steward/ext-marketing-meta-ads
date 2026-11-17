@@ -12,12 +12,12 @@ code is unchanged from 4ad7b113; the shared publisher adds explicit visibility
 validation. No local publisher or visibility policy fork is maintained here.
 
 ci.yml stays workflow_dispatch/contents:read and never creates a Git tag or release.
-Its release-prep scope runs only static/packager tests and native archive smoke
-on both targets. Runtime inputs must match accepted release 0e03a61 byte-for-byte,
-with the sole exact manifest/descriptor edits being 1.0.0 to 1.0.1 and listing
-visibility private to public_reference. CI/docs/artwork and the two freshly run
-packaging test files are excluded from this runtime comparison. The earlier
-runtime test pass at b5edea6 is inherited, not rerun or relabeled as fresh evidence.
+The `source` scope checks extension-static and the selected source tests,
+including global Support registration/content and packaging regressions, then
+accepts both native offline archives. The new immutable 1.0.3 release requires
+this scope at its exact main SHA. The historical recovery/release-prep scopes
+retain their original exact baselines; they do not provide current source evidence
+and cannot satisfy the public publisher’s `check_scope == "source"` guards.
 The source-bound plan includes the reviewed versioned notes as an additional asset.
 
 publish.yml is a SEPARATE manual workflow. It selects an exact successful
@@ -33,7 +33,7 @@ and META_ADS_RELEASE_APPROVED_CORE_SHA, matching the exact main/dispatch source 
 stable published Core v0.9.18 tag commit. They are set only for the frozen
 candidate after successful preparation. The release owner accepts host compatibility before recording that
 Core SHA; candidate CI remains pinned to the documented tested host. The release
-owner supplies the new immutable v1.0.1 tag at the approved source only after that GO,
+owner supplies the new immutable v1.0.3 tag at the approved source only after that GO,
 as required by the shared publisher. CI verifies it before uploading any ZIP;
 there is no local tag creation or repair path. Existing tags/assets are verified;
 conflicting or partial outcomes are not repaired or retried.

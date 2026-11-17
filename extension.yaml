@@ -4,11 +4,12 @@ lifecycle:
   data_migrations: []
 extension_id: "flowsteward.meta-ads"
 kind: "tool_provider"
-version: "1.0.2"
+version: "1.0.3"
 display_name: "Meta Ads"
 description: "Create paused website traffic campaigns and single-image Facebook and Instagram feed ads from workflows."
 vendor:
   name: "Flow Steward"
+  support_url: "https://github.com/Flow-Steward/ext-marketing-meta-ads/issues"
 listing:
   category: "marketing"
   description: |-

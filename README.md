@@ -1,12 +1,14 @@
 # Meta Ads for Flow Steward
 
 Create paused website traffic campaigns, ad sets and single-image Facebook/Instagram feed ads
-through typed workflow actions. Extension ID: `flowsteward.meta-ads`, version `1.0.1`.
+through typed workflow actions. Extension ID: `flowsteward.meta-ads`, version `1.0.3`.
 Runtime: CPython 3.12, public extension SDK 0.4.0+, `extension_host_v2`, Meta API `v27.0`.
 
 ## Release status
 
-Version 1.0.1 updates the original campaign icon and public release metadata.
+Version 1.0.3 adds a global **Support** page with links to this repository’s issue
+tracker, reporting guidance and diagnostics instructions. It retains the Pillow
+13.0.0 JPEG/PNG validation fix from 1.0.2.
 Runtime requirements are pinned by version and SHA-256 in
 `extension.yaml`; both native Pillow wheels are committed for offline installation.
 The manual CI in `.github/workflows/ci.yml` prepares separate AMD64 and ARM64 ZIPs,
@@ -28,6 +30,13 @@ write outcome even if Meta supplies a structured error code.
 
 Live OAuth and actual Meta object acceptance remain unverified. Local checks do not
 establish publication readiness or real advertising-account access.
+
+## Support
+
+Open the extension’s **Support** page to report a problem or request a feature.
+[Browse existing issues](https://github.com/Flow-Steward/ext-marketing-meta-ads/issues)
+before opening a public report. Review any diagnostics before sharing; never include
+passwords, API keys, tokens, connection strings or customer data.
 
 ## Supported profile
 

@@ -216,6 +216,7 @@ def main() -> None:
                     if scope == "release-prep"
                     else " ".join(
                         [
+                            "tests/test_support.py",
                             "tests/test_validation.py",
                             "tests/test_image_security.py",
                             "tests/test_operations.py",
@@ -274,7 +275,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.2",
+                "v1.0.3",
                 "--config",
                 ".github/release-config.json",
                 "--out-dir",
@@ -292,7 +293,7 @@ def main() -> None:
                 "--repository",
                 REPOSITORY,
                 "--tag",
-                "v1.0.2",
+                "v1.0.3",
                 "--source-sha",
                 sha,
                 "--catalog-root",

@@ -9,6 +9,8 @@ import zipfile
 import pytest
 import yaml
 
+from test_support import assert_support_page
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -76,7 +78,7 @@ def test_explicit_target_and_output_produce_only_one_compatible_archive(package_
     out = tmp_path / "output"
     result = package(package_source, out, "linux-amd64")
     assert result.returncode == 0, result.stderr
-    expected = out / "flowsteward.meta-ads-1.0.2-linux-amd64.zip"
+    expected = out / "flowsteward.meta-ads-1.0.3-linux-amd64.zip"
     assert expected.is_file(), result.stdout
     assert list(out.iterdir()) == [expected]
     with zipfile.ZipFile(expected) as archive:
@@ -88,6 +90,8 @@ def test_explicit_target_and_output_produce_only_one_compatible_archive(package_
         assert len(wheels) == 1 and "x86_64" in wheels[0]
         assert "flowsteward_meta_ads/icon.png" in names
         assert "flowsteward_meta_ads/BRANDING.md" in names
+        archive.extractall(tmp_path / "unpacked")
+        assert_support_page(tmp_path / "unpacked/flowsteward_meta_ads")
         assert not any(
             "/.github/" in name or "/dev-wheels/" in name or "/.git/" in name for name in names
         )

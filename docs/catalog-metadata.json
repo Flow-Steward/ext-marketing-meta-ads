@@ -1,7 +1,7 @@
 {
   "extension_id": "flowsteward.meta-ads",
   "display_name": "Meta Ads",
-  "planned_version": "1.0.1",
+  "planned_version": "1.0.3",
   "readiness": "CI_PREPARATION",
   "include_in_core_0_9_18_release_batch": false,
   "source_sha": null,
@@ -37,11 +37,11 @@
   ],
   "live_acceptance": "PENDING: no Meta app or test advertising account was supplied.",
   "ci_plan": [
-    "Run extension-static and tests/test_packaging.py, then tests/test_package_install.py on both native architectures through hosted fs-audit.",
-    "Verify runtime inputs match accepted 1.0.0 with only exact version/listing metadata changes.",
-    "Publish new immutable 1.0.1 through shared public CI publisher; ROOT owns catalog update."
+    "Run source-scope extension-static and selected extension tests, including Support registration/content and bundle regression, through hosted fs-audit.",
+    "Run tests/test_package_install.py against both exact native architecture archives, including global Support content and offline Pillow 13.0.0 JPEG/PNG acceptance.",
+    "Publish new immutable 1.0.3 through the guarded shared public CI publisher after exact main-source checks; ROOT owns catalog delivery."
   ],
   "source_status": "Public source repository; exact source and ZIP hashes are bound by generated release-plan.json.",
   "ci_repository": "Flow-Steward/ext-marketing-meta-ads",
-  "publication": "Authorized original-icon 1.0.1; await exact candidate CI before publication."
+  "publication": "Support-page 1.0.3 candidate; await exact main source CI and ROOT publication approval variables."
 }
