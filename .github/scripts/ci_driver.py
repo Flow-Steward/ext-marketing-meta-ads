@@ -217,6 +217,7 @@ def main() -> None:
                     else " ".join(
                         [
                             "tests/test_validation.py",
+                            "tests/test_image_security.py",
                             "tests/test_operations.py",
                             "tests/test_transport.py",
                             "tests/test_setup_and_boundaries.py",
